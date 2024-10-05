@@ -92,9 +92,9 @@ export default function PatientHistory() {
             <p className="text-lg text-muted-foreground">No medical records found.</p>
             </Card>
         )}
-        <div className="mb-6 text-center">
+        <div className="mb-6 text-center mt-5">
             <Link href={`/input_page/`} passHref>
-                <Button variant="primary">
+                <Button variant="secondary">
                     Add New Patient
                 </Button>
             </Link>
