@@ -6,20 +6,43 @@ export interface Env {
 }
 
 export default {
-	async fetch(request, env): Promise<Response> {
+	async fetch(request: Request, env: Env): Promise<Response> {
 		const { pathname } = new URL(request.url);
+
+		// Handle CORS headers
+		const addCorsHeaders = (response: Response) => {
+			const modifiedResponse = new Response(response.body, response);
+			modifiedResponse.headers.set('Access-Control-Allow-Origin', '*'); // Change '*' to your specific origin if needed
+			modifiedResponse.headers.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+			modifiedResponse.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+			return modifiedResponse;
+		};
+
+		// Handle preflight requests
+		if (request.method === 'OPTIONS') {
+			return addCorsHeaders(new Response(null, {
+				status: 204,
+				headers: {
+					'Access-Control-Allow-Origin': '*',
+					'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+					'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+				},
+			}));
+		}
 
 		const doctorFilesPattern = /^\/api\/doctor\/([^\/]+)\/get-files$/;
 		const doctorMatch = pathname.match(doctorFilesPattern);
 
+		const userFilePattern = /^\/api\/patient\/([^\/]+)\/get-info/;
+		const userFileMatch = pathname.match(userFilePattern);
+
+		console.log(userFileMatch);
+
 		if (doctorMatch) {
-			// If you did not use `DB` as your binding name, change it here
-			//
-			console.log(doctorMatch[1]);
 			const { results } = await env.DB.prepare(
 				`
 SELECT
-    Patients.FilePath
+    Patients.FilePath, Patients.FirstName, Patients.LastName, Patients.PatientID
 FROM
     Patients
 INNER JOIN
@@ -28,26 +51,31 @@ ON
     Patients.PhysicianID = Physicians.Email
 WHERE
     Physicians.Email = ?;
-
-
-`)
+`,
+			)
 				.bind(doctorMatch[1])
 				.all();
 
-
-			console.log(results);
-			return Response.json(results);
+			return addCorsHeaders(Response.json(results)); // Add CORS headers to the response
 		}
 
+		if (userFileMatch) {
+			const result = await env.DB.prepare(
+				`
+SELECT
+    *
+FROM
+    Patients
+WHERE
+    PatientID = ?;
+`,
+			)
+				.bind(userFileMatch[1])
+				.first();
 
+			return addCorsHeaders(Response.json(result)); // Add CORS headers to the response
+		}
 
-
-
-
-
-
-		return new Response(
-			"Call /api/beverages to see everyone who works at Bs Beverages",
-		);
+		return addCorsHeaders(new Response('Call /api/beverages to see everyone who works at Bs Beverages')); // Add CORS headers here
 	},
 } satisfies ExportedHandler<Env>;
