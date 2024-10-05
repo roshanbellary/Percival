@@ -1,72 +1,97 @@
-"use client";
-import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Card } from "@/components/ui/card";
-import { useState, useEffect } from "react";
+"use client"
+import { useState, useEffect } from "react"
+import Link from 'next/link'
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Skeleton } from "@/components/ui/skeleton"
+import { FileText, Calendar } from "lucide-react"
 
-import Link from 'next/link';
-
-export default function PatientHistory() {
-    const [email, setUserEmail] = useState('');
-    const [pdfList, setPdfList] = useState([]);
-
+interface MedicalRecord {
+    PatientID: number
+    FilePath: string
+    FirstName: string
+    LastName: string
+  }
+  
+  export default function PatientHistory() {
+    const [email, setEmail] = useState('')
+    const [medicalRecords, setMedicalRecords] = useState<MedicalRecord[]>([])
+    const [isLoading, setIsLoading] = useState(true)
+  
     useEffect(() => {
-        const userEmail = localStorage.getItem('email');
-        if (userEmail) {
-            setUserEmail(userEmail);
-        }
-        console.log(email);
-    });
-
-    // Effect to fetch PDF list based on the email
+      const userEmail = localStorage.getItem('email')
+      if (userEmail) {
+        setEmail(userEmail)
+      }
+    }, [])
+  
     useEffect(() => {
-        const patientPdfs = async () => {
-            if (email) {
-                try {
-                    const response = await fetch(`https://d1-tutorial.cows.workers.dev/api/doctor/${email}/get-files`);
-                    const data = await response.json();
-                    for (const entry of data) {
-                        if (entry["FilePath"]) {
-                            setPdfList([...pdfList, entry["FilePath"]]);
-                        }
-                    }
-                    setPdfList(data);
-                } catch (error) {
-                    console.error(error);
-                }
-            }
+      const fetchMedicalRecords = async () => {
+        if (email) {
+          try {
+            setIsLoading(true)
+            const response = await fetch(`https://d1-tutorial.cows.workers.dev/api/doctor/${email}/get-files`)
+            const data = await response.json()
+            setMedicalRecords(data)
+          } catch (error) {
+            console.error("Failed to fetch medical records:", error)
+          } finally {
+            setIsLoading(false)
+          }
         }
-        patientPdfs();
-    }, [email]);
-
+      }
+      fetchMedicalRecords()
+    }, [email])
+  
     return (
-        <div className="p-4">
-            <Label>Email</Label>
-            <Textarea value={email} onChange={(e) => setUserEmail(e.target.value)} />
-
-            {/* Display PDFs preview */}
-            {pdfList.length > 0 && (
-                <div className="mt-4">
-                    <h2 className="text-lg font-bold mb-2">PDF Previews</h2>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {pdfList.map((pdf, index) => (
-                            <Link key={index} href={`/patient_info/${pdf.PatientID}/`}>
-                                <Card className="p-4 shadow-md">
-                                    <h3 className="text-md font-semibold mb-2">PDF {index + 1}</h3>
-                                    <iframe
-                                        src={pdf.FilePath}
-                                        width="100%"
-                                        height="300"
-                                        title={`PDF Preview ${index + 1}`}
-                                        className="border border-gray-300"
-                                    />
-                                </Card>
-                            </Link>
-                        ))}
-                    </div>
-                </div>
-            )}
-        </div>
-    );
-}
+      <div className="container mx-auto p-4 max-w-4xl">
+        <h1 className="text-3xl font-bold mb-6 text-center text-primary">Your Medical History</h1>
+        
+        {isLoading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {[...Array(4)].map((_, index) => (
+              <Card key={index} className="w-full">
+                <CardHeader>
+                  <Skeleton className="h-4 w-3/4" />
+                </CardHeader>
+                <CardContent>
+                  <Skeleton className="h-32 w-full" />
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : medicalRecords.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {medicalRecords.map((record, index) => (
+              <Link key={index} href={`/patient_info/${record.PatientID}/`} passHref>
+                <Card className="w-full hover:shadow-lg transition-shadow duration-300 cursor-pointer">
+                  <CardHeader>
+                    <CardTitle className="text-lg font-semibold flex items-center">
+                      <FileText className="mr-2" size={18} />
+                      {`Medical Record: ${record.FirstName+ " " + record.LastName}`}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <Button variant="outline" className="w-full">
+                      View Details
+                    </Button>
+                  </CardContent>
+                  <CardContent>
+                    <iframe
+                        src={record.FilePath}
+                        className="w-full h-96 border border-gray-300"
+                        title="Patient PDF"
+                    />
+                  </CardContent>
+                </Card>
+              </Link>
+            ))}
+          </div>
+        ) : (
+          <Card className="w-full p-6 text-center">
+            <p className="text-lg text-muted-foreground">No medical records found.</p>
+          </Card>
+        )}
+      </div>
+    )
+  }
