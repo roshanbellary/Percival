@@ -147,7 +147,7 @@ export default function InputPage() {
             </div>
           )}
 
-          <Button type="submit" className="w-full py-6 text-lg">
+          <Button type="submit" className="w-full py-6 text-lg" onClick={(e) => {handleSubmit(e)}}>
             <Send className="mr-2 h-5 w-5" /> Submit
           </Button>
         </form>
