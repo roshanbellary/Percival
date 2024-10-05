@@ -13,6 +13,9 @@ writer = PdfWriter()
 page = reader.pages[0]
 fields = reader.get_fields()
 
+print("fields before completion \n")
+print(fields)
+
 
 PARSE_GPT_PROMPT_TEMPLATE = """
 You are a Medical AI Assistant who is given a text file a Doctor uploaded with medical information, or from the transcript of a 
@@ -168,7 +171,7 @@ with open("filled-out.json", "r") as f:
 
 reply_json = json.loads(reply_json_str)
 
-
+# Filter empty elements
 filtered_json = {k: v for k, v in reply_json.items() if len(v) > 0}
 
 noncheck_fields = {k: v for k, v in filtered_json.items() if not ("checked" in v or "nocheck" in v)}
@@ -177,23 +180,22 @@ check_fields = {k: v for k, v in filtered_json.items() if "checked" in v or "noc
 # update all checked to /On and unchecked to /Off
 for k, v in check_fields.items():
     if "checked" in v:
-        check_fields[k] = "/Yes"
+        # Makes no sense but No is checked
+        check_fields[k] = "/No"
     else:
-        check_fields[k] = "/Yes"
+        #To-Do fix this
+        check_fields[k] = "/Off"
 
 
-
-
-# print(chat_completion)
-# print(chat_completion)/
-# print(fields)
+print("check_fields")
+print(check_fields)
 
 writer.append(reader)
 
 writer.update_page_form_field_values(
     writer.pages[0],
     noncheck_fields,
-    auto_regenerate=False,
+    auto_regenerate=True,
 )
 
 # writer.update_page_form_field_values(
@@ -202,17 +204,45 @@ writer.update_page_form_field_values(
 #     auto_regenerate=False,
 # )
 
-writer_annot = page
-for field in check_fields:
-    print(field)
-    if writer_annot.get('/T') == field:
-        print("HI")
-        writer_annot.update({
-            NameObject("/V"): NameObject(check_fields[field]),
-            NameObject("/AS"): NameObject(check_fields[field])
-        })
+# Manually iterate over checkboxes and update their values
+for annotation in writer.pages[0]["/Annots"]:
+    field = annotation.get_object()
+    
+    # Get the field name
+    field_name = field.get("/T")
+    
+    if field_name in check_fields:
+        # Set the checkbox value to /Yes (checked) or /Off (unchecked)
+        if check_fields[field_name] == "/No":
+            field.update({
+                NameObject("/V"): NameObject("/No"),
+                NameObject("/AS"): NameObject("/No"),
+                NameObject("/DV"): NameObject("/No")
+            })
 
-print(check_fields)
+            print("updated to true")
+        else:
+            field.update({
+                NameObject("/V"): NameObject("/Off"),
+                NameObject("/AS"): NameObject("/Off")
+            })
 
+print("fields after completion \n")
+# For text fields, print their updated values
+for field_name, field_info in noncheck_fields.items():
+    print(f"Text Field '{field_name}': {field_info}")
+
+# For checkbox fields, print their updated values
+for annotation in writer.pages[0]["/Annots"]:
+    field = annotation.get_object()
+    field_name = field.get("/T")
+    
+    if field_name in check_fields:
+        # Get the current value and appearance state of the checkbox
+        checkbox_value = field.get("/V", "No Value")
+        appearance_state = field.get("/AS", "No Appearance State")
+        print(f"Checkbox Field '{field_name}': Value = {checkbox_value}, Appearance State = {appearance_state}")
+
+# Save the updated PDF with checkboxes checked
 with open("filled-out.pdf", "wb") as output_stream:
     writer.write(output_stream)
