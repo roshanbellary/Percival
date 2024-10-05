@@ -3,6 +3,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useState, useEffect, useRef } from "react";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { Mic, Send } from "lucide-react"
 
 export default function InputPage() {
   const [inputType, setInputType] = useState("text"); // To toggle between 'text' and 'audio'
@@ -95,68 +97,63 @@ export default function InputPage() {
   };
   return (
     email !== "" ?
-    <div style={{textAlign:"center"}}>
-        <h2 className="scroll-m-20  text-3xl font-semibold tracking-tight first:mt-0">
-            Patient Symptoms and Notes
-        </h2>
-        <form onSubmit={handleSubmit} className="max-w-xl mx-auto p-4 space-y-4">
-        {/* Input Type Toggle */}
-        <div className="grid w-full gap-2">
-            <Label>Choose Input Type</Label>
-            <div className="flex space-x-4">
-            <Button
-                type="button"
-                variant={inputType === "text" ? "primary" : "outline"}
-                onClick={() => setInputType("text")}
-            >
-                Text Input
-            </Button>
-            <Button
-                type="button"
-                variant={inputType === "audio" ? "primary" : "outline"}
-                onClick={() => setInputType("audio")}
-            >
-                Audio Input
-            </Button>
-            </div>
-        </div>
-        {inputType === "text" ? (
-            <div className="grid w-full gap-2">
-            <Label htmlFor="patient-info">Input Patient Information</Label>
-            <Textarea
+    (
+      <div className="min-h-screen bg-background max-w-[1000px] mx-auto">
+      <div className="container mx-auto p-6 space-y-8">
+        <h1 className="text-4xl font-bold text-primary">Patient Symptoms and Notes</h1>
+        <form className="space-y-6">
+          <div className="space-y-4">
+            <Label htmlFor="input-type" className="text-lg font-medium">Choose Input Type</Label>
+            <RadioGroup id="input-type" className="flex space-x-4" defaultValue="text" onValueChange={setInputType}>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="text" id="text" />
+                <Label htmlFor="text">Text Input</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="audio" id="audio" />
+                <Label htmlFor="audio">Audio Input</Label>
+              </div>
+            </RadioGroup>
+          </div>
+
+          {inputType === "text" ? (
+            <div className="space-y-2">
+              <Label htmlFor="patient-info" className="text-lg font-medium">Input Patient Information</Label>
+              <Textarea
                 id="patient-info"
                 placeholder="Enter patient information here..."
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                required={inputType === "text"}
-            />
+                className="min-h-[200px] w-full"
+              />
             </div>
-        ) : (
-            <div className="grid w-full gap-2">
-            <Label>Audio Input</Label>
-            <div className="flex items-center space-x-4">
-                {!isRecording ? (
-                <Button type="button" onClick={startRecording}>
-                    Start Recording
-                </Button>
+          ) : (
+            <div className="space-y-4">
+              <Label className="text-lg font-medium">Record Audio</Label>
+              <Button
+                type="button"
+                variant={isRecording ? "destructive" : "default"}
+                className="w-full py-8 text-lg"
+                onClick={isRecording ? stopRecording() : startRecording()}
+              >
+                {isRecording ? (
+                  <>
+                    <Mic className="mr-2 h-6 w-6" /> Stop Recording
+                  </>
                 ) : (
-                <Button type="button" variant="destructive" onClick={stopRecording}>
-                    Stop Recording
-                </Button>
+                  <>
+                    <Mic className="mr-2 h-6 w-6" /> Start Recording
+                  </>
                 )}
-                {audioURL && (
-                <audio controls src={audioURL} className="mt-2 w-full">
-                    Your browser does not support the audio element.
-                </audio>
-                )}
+              </Button>
             </div>
-            </div>
-        )}
+          )}
 
-        {/* Submit Button */}
-        <div className="flex justify-end">
-            <Button type="submit">Submit</Button>
-        </div>
+          <Button type="submit" className="w-full py-6 text-lg">
+            <Send className="mr-2 h-5 w-5" /> Submit
+          </Button>
         </form>
-    </div>: <div style={{textAlign:"center"}}>Not Signed Up</div>)
+      </div>
+    </div>
+    )
+    
+    : <div style={{textAlign:"center"}}>Not Signed Up</div>)
 }
