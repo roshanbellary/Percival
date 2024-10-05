@@ -22,7 +22,7 @@ export default function PatientHistory() {
         const patientPdfs = async () => {
             if (email) {
                 try {
-                    const response = await fetch(`http://localhost:3000/api/doctor/${email}/get-files`);
+                    const response = await fetch(`https://d1-tutorial.cows.workers.dev/api/doctor/${email}/get-files`);
                     const data = await response.json();
                     for (const entry of data) {
                         if (entry["FilePath"]) {
@@ -42,10 +42,6 @@ export default function PatientHistory() {
         <div className="p-4">
             <Label>Email</Label>
             <Textarea value={email} onChange={(e) => setUserEmail(e.target.value)} />
-            <Button onClick={() => {
-                localStorage.setItem('email', email);
-                alert('Email saved');
-            }}>Save</Button>
 
             {/* Display PDFs preview */}
             {pdfList.length > 0 && (

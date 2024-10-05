@@ -26,7 +26,7 @@ export default function Component() {
     localStorage.setItem("email", email)
     // Here you would typically handle login logic
 
-    router.push("/input_page")
+    router.push("/patient_history")
   }
 
   return (
@@ -44,7 +44,7 @@ export default function Component() {
               <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
-                type="email"
+                type="string"
                 placeholder="m@example.com"
                 required
                 value={email}
