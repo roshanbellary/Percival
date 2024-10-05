@@ -132,7 +132,7 @@ export default function InputPage() {
                 type="button"
                 variant={isRecording ? "destructive" : "default"}
                 className="w-full py-8 text-lg"
-                onClick={isRecording ? stopRecording() : startRecording()}
+                onClick={isRecording ? () => stopRecording() : () => startRecording()}
               >
                 {isRecording ? (
                   <>
