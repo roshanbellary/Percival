@@ -9,16 +9,13 @@ export default function PatientHistory() {
     const [email, setUserEmail] = useState('');
     const [pdfList, setPdfList] = useState([]);
 
-    // Effect to set user email from local storage
     useEffect(() => {
-        const setAuthEmail = () => {
-            const storedEmail = localStorage.getItem('email');
-            if (storedEmail) {
-                setUserEmail(storedEmail);
-            }
+        const userEmail = localStorage.getItem('email');
+        if (userEmail) {
+          setUserEmail(userEmail);
         }
-        setAuthEmail();
-    }, []); // Run only once on mount
+        console.log(email);
+      });
 
     // Effect to fetch PDF list based on the email
     useEffect(() => {

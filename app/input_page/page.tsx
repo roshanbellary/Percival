@@ -15,10 +15,12 @@ export default function InputPage() {
   const audioChunksRef = useRef([]);
   // Function to start recording
   useEffect(() => {
-    if (localStorage.getItem('email')) {
-        setUserEmail(email);
+    const userEmail = localStorage.getItem('email');
+    if (userEmail) {
+      setUserEmail(userEmail);
     }
-  }, [email]);
+    console.log(email);
+  });
   const startRecording = async () => {
     if (!navigator.mediaDevices) {
       alert("Media Devices API not supported in this browser.");
@@ -91,7 +93,6 @@ export default function InputPage() {
       alert("An error occurred while submitting the form.");
     }
   };
-
   return (
     email !== "" ?
     <div style={{textAlign:"center"}}>
