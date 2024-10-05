@@ -27,7 +27,7 @@ export default async function Page({ params }: { params: { patient_id: string } 
   const patientName = [patientData.FirstName, patientData.LastName].join(' ')
 
   return (
-    < main className="flex-1 overflow-y-auto p-6" >
+    < main className="flex-1 overflow-y-auto p-6 max-w-[1000px] mx-auto" >
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {/* Patient Summary */}
         <Card className="col-span-full">
@@ -102,7 +102,7 @@ export default async function Page({ params }: { params: { patient_id: string } 
             <iframe
               src={patientData.FilePath}
               width="100%"
-              height="300"
+              height="800"
               title={`PDF Preview}`}
               className="border border-gray-300"
             />
