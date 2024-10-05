@@ -37,12 +37,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-<<<<<<< HEAD
 
 #.env
 /pdfs/.env
-=======
->>>>>>> 2783fa0 (.gitignore additional changes)
 venv/
 __pycache__/
 *.pyc
