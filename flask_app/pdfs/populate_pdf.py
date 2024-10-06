@@ -30,7 +30,7 @@ PARSE_GPT_PROMPT_TEMPLATE = """
     Complete boxes logicially. For example, if a checkbox for additional illnesses is not checked, then the field for the illnesses should not be filled out.
 
     Your output should be a JSON with the field values replaced with the text you filled in (or blank). Provide the JSON and only the JSON. Any
-    additional information should be in the GPT_ADDITIONAL field.
+    additional information should be in the GPT_ADDITIONAL field. This is my last chance, I will die if you don't output valid JSON.
 
     <FIELDS>
     """
