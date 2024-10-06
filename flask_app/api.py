@@ -20,7 +20,8 @@ from pathlib import Path
 
 from pdfs.full_pdf_pipeline import create_anon_pdf
 from pdfs.ml.ml_find_similar import find_closest_pipeline
-from pdfs.full_pdf_pipeline import anonmyze_pdf
+from pdfs.full_pdf_pipeline import anonymize_pdf
+
 # MongoDB connection setup
 load_dotenv()
 mongo_uri = os.getenv("MONGODB_URI")
