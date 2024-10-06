@@ -9,6 +9,7 @@ import os
 import whisper
 import json
 import tempfile
+from pdfs.full_pdf_pipeline import create_anon_pdf
 
 app = Flask(__name__)
 CORS(app, support_credentials=True)
@@ -69,6 +70,15 @@ def return_transcript():
     # Assuming `a` is defined globally and holds the last transcript.
     return {'transcript': a} if a else {'message': 'No transcript available'}, 404
 
+@app.route('/populate-pdf', methods=['POST'])
+def populate_pdf():
+    data = request.data
+    args = data['details']
+    file_name = create_anon_pdf(args)
+    return_object = {
+        data: file_name
+    }
+    return json.stringify(return_object)
 
 @app.route('/upload-text', methods=['POST'])
 def upload_text():
