@@ -1,0 +1,31 @@
+id,Treatment1,Treatment2,Treatment3,Treatment4,Treatment5
+1,Optimize ART regimen,Start PCP prophylaxis: TMP-SMX,Treat KS: Liposomal Doxorubicin,Continue TB preventive therapy: INH+Pyridoxine,Manage fatigue: Evaluate for anemia
+2,Initiate ART: ABC+3TC+DTG,Start TB preventive therapy: INH+Pyridoxine,Counsel on adherence and lifestyle modifications,-1,-1
+3,Optimize ART: Consider second-line regimen,Start PCP prophylaxis: TMP-SMX,Begin TB treatment: HRZE regimen,Adherence counseling and support,-1
+4,Regular HIV monitoring,Provide education on HIV prevention,Offer vaccinations: Influenza and Hepatitis B,TB screening and testing,-1
+5,Initiate ART: TDF+FTC+EFV,Start PCP prophylaxis: TMP-SMX,Treat KS: Radiotherapy,Nutritional support and counseling,Start TB preventive therapy: INH+Pyridoxine
+6,Initiate ART: TDF+3TC+EFV,Start TB preventive therapy: INH+Pyridoxine,Manage diarrhea: Loperamide and hydration,Assess fatigue: Screen for depression,-1
+7,Regular HIV monitoring,Provide education on safe practices,Offer vaccinations: Influenza and Tdap,TB screening and testing,-1
+8,Optimize ART regimen,Start PCP prophylaxis: TMP-SMX,Treat KS: Systemic chemotherapy,Nursing care services,Begin TB treatment: HRZE regimen
+9,Initiate ART: ABC+3TC+DTG,Start TB preventive therapy: INH+Pyridoxine,Manage fatigue: Check thyroid function and anemia,-1,-1
+10,Optimize ART regimen,Start PCP prophylaxis: TMP-SMX,Treat KS: Liposomal Doxorubicin,Nutritional support,Continue TB preventive therapy: INH+Pyridoxine
+11,Regular HIV monitoring,Provide education on HIV prevention,Offer vaccinations: Pneumococcal and Influenza,TB screening and testing,-1
+12,Initiate ART: TDF+FTC+EFV,Start TB preventive therapy: INH+Pyridoxine,Provide adherence counseling,-1,-1
+13,Optimize ART: Consider second-line regimen,Start PCP prophylaxis: TMP-SMX,Treat KS: Interferon-alpha therapy,Nutritional support,Begin TB treatment: HRZE regimen
+14,Regular HIV monitoring,Provide education on safe practices,Offer vaccinations: Hepatitis B and HPV,TB screening and testing,-1
+15,Initiate ART: ABC+3TC+DTG,Start TB preventive therapy: INH+Pyridoxine,Manage fatigue: Evaluate for sleep disorders,-1,-1
+16,Optimize ART regimen,Start PCP prophylaxis: TMP-SMX,Treat KS: Radiotherapy,Nursing care services,Begin TB treatment: HRZE regimen
+17,Regular HIV monitoring,Provide education on HIV prevention,Offer vaccinations: Influenza and Pneumococcal,TB screening and testing,-1
+18,Initiate ART: TDF+3TC+EFV,Start TB preventive therapy: INH+Pyridoxine,Manage diarrhea: Antimotility agents,Hydration therapy,-1
+19,Initiate ART: TDF+FTC+EFV,Start PCP prophylaxis: TMP-SMX,Treat KS: Liposomal Doxorubicin,Nutritional support,Continue TB preventive therapy: INH+Pyridoxine
+20,Regular HIV monitoring,Provide education on safe practices,Offer vaccinations: Tdap and Hepatitis B,TB screening and testing,-1
+21,Optimize ART regimen,Start PCP prophylaxis: TMP-SMX,Treat KS: Systemic chemotherapy,Nursing care services,Begin TB treatment: HRZE regimen
+22,Initiate ART: ABC+3TC+DTG,Start TB preventive therapy: INH+Pyridoxine,Counsel on adherence and nutrition,-1,-1
+23,Optimize ART: Consider second-line regimen,Start PCP prophylaxis: TMP-SMX,Treat KS: Interferon-alpha therapy,Nutritional support,Continue TB preventive therapy: INH+Pyridoxine
+24,Regular HIV monitoring,Provide education on HIV prevention,Offer vaccinations: Influenza and HPV,TB screening and testing,-1
+25,Optimize ART regimen,Start PCP prophylaxis: TMP-SMX,Treat KS: Radiotherapy,Nursing care services,Begin TB treatment: HRZE regimen
+26,Regular HIV monitoring,Provide education on safe practices,Offer vaccinations: Hepatitis B and Pneumococcal,TB screening and testing,-1
+27,Initiate ART: TDF+FTC+EFV,Start PCP prophylaxis: TMP-SMX,Treat KS: Liposomal Doxorubicin,Nutritional support,Continue TB preventive therapy: INH+Pyridoxine
+28,Initiate ART: TDF+3TC+EFV,Start TB preventive therapy: INH+Pyridoxine,Provide adherence counseling,-1,-1
+29,Initiate ART: ABC+3TC+DTG,Start TB preventive therapy: INH+Pyridoxine,Manage diarrhea: Loperamide and rehydration,-1,-1
+30,Optimize ART regimen,Start PCP prophylaxis: TMP-SMX,Treat KS: Systemic chemotherapy,Nursing care services,Begin TB treatment: HRZE regimen
