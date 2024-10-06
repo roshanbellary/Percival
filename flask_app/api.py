@@ -20,6 +20,7 @@ from pathlib import Path
 
 from pdfs.full_pdf_pipeline import create_anon_pdf
 from pdfs.ml.ml_find_similar import find_closest_pipeline
+from pdfs.full_pdf_pipeline import anonmyze_pdf
 # MongoDB connection setup
 load_dotenv()
 mongo_uri = os.getenv("MONGODB_URI")
@@ -195,6 +196,7 @@ def upload_pdf():
         return jsonify({'message': 'Doctor not found'}), 401
 
 
+
 @app.route('/upload-text', methods=['POST'])
 def upload_text():
     first_name = request.form.get('first_name')
@@ -263,7 +265,21 @@ def get_pdf():
         return jsonify({'message': result_text}), 200
     else:
         return jsonify({'message': 'No data uploaded'}), 400
+    
+@app.route('/anonymize-pdf', methods=['POST'])
+def anonymize_pdf_route():
+    # Extract data from the request
+    pdf_file = request.files.get('pdf')
 
+    if not pdf_file:
+        return jsonify({'message': 'Missing required parameters'}), 400
+
+    # Call the anonymize_pdf function (assuming it exists and takes these parameters)
+    try:
+        anonymized_pdf = anonymize_pdf(pdf_file)
+        return jsonify({'message': 'PDF anonymized successfully', 'anonymized_pdf': anonymized_pdf}), 200
+    except Exception as e:
+        return jsonify({'message': f'Error anonymizing PDF: {str(e)}'}), 500
 
 def get_field_value(pdd, field_path, default=-2, true_value=1, false_value=0):
     """

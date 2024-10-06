@@ -43,6 +43,43 @@ def create_anon_pdf(configs):
 
     return file_stored
 
+def anonymize_pdf(file_name, client):
+    """
+    Anonymizes a public PDF file and updates the corresponding anonymized PDF.
+
+    Args:
+    - public_pdf_path: Path to the non-anonymized PDF file.
+    - configs: Configuration settings required for the anonymization process.
+    - client: The OpenAI client instance used to interact with GPT for anonymization.
+
+    Returns:
+    - Path to the updated anonymized PDF file.
+    """
+
+    # Define the parent directory path
+    parent = str(Path(__file__).parent.parent.parent)
+
+    # Get public PDF location
+    nonanon_file_loc = parent + "/app/public/pdfs/" + file_name
+    
+    # Get anonymized fields
+    anon_json = anonpdf(nonanon_file_loc, client)
+
+    for key, value in anon_json.items():
+        anon_json[key] = "[" + value + "]"
+
+    # Fill out the output PDF with the anonymized fields
+    anon_file_loc = parent + "/app/public/anonpdfs/" + file_name
+    
+    try:
+        edit_fields(anon_json, nonanon_file_loc, anon_file_loc)
+    except (IOError, OSError) as e:
+        print(f"Error editing fields in PDF: {e}")
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
+
+
+
 
 # config = {
 #     "FIRSTNAME": "Roshan",
