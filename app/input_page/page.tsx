@@ -161,6 +161,7 @@ export default function InputPage() {
     formData.append("last_name", lastName);
     formData.append("dob", dob);
     formData.append("ssn", ssn);
+    formData.append("language", language);
 
     if (inputType === "text") {
       formData.append("message", message);
