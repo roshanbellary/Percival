@@ -89,8 +89,7 @@ def upload_text():
                        "dob": dob, "ssn": ssn, "message": text, "language": language}
     response_text = f"First Name: {first_name}, Last Name: {last_name}, DOB: {dob}, SSN: {ssn}, Language: {language}, Transcription: {text}"
     print(response_text)
-    return json.dumps({"first_name": first_name, "last_name": last_name,
-                       "dob": dob, "ssn": ssn, "message": text, "language": language})
+    return {'transcription': response_text}, 200
 
 def translate_text(text, target_language):
     """Translate text to the target language."""
