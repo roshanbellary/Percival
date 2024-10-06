@@ -17,7 +17,7 @@ interface MedicalRecord {
 export default function PatientHistory() {
   const [email, setEmail] = useState("");
   const [medicalRecords, setMedicalRecords] = useState<MedicalRecord[]>([]);
-  const [filteredMedicalRecords, setFilteredMedicalRecords] = useState<MedicalRecord[]>([]);
+  const [filteredMedicalRecords, setFilteredMedicalRecords] = useState<MedicalRecord[]>();
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -39,6 +39,7 @@ export default function PatientHistory() {
           const data = await response.json();
           console.log(data);
           setMedicalRecords(data["patients"]);
+          setFilteredMedicalRecords(data["patients"]);
         } catch (error) {
           console.error("Failed to fetch medical records:", error);
         } finally {
@@ -53,10 +54,16 @@ export default function PatientHistory() {
 
 
   return (
-    <div className="container mx-auto p-4 max-w-4xl">
-      <h1 className="text-3xl font-bold mb-6 text-center text-primary">
-        Your Medical History
-      </h1>
+    <div className="max-w-[1000px] mx-auto p-6 max-w-4xl">
+      <div className="flex pb-4">
+        <h1 className="text-4xl font-bold text-primary">
+          Your Patients
+        </h1>
+        <div className="grow"></div>
+        <Link href={`/input_page/`} passHref>
+          <Button variant="secondary">Add New Patient</Button>
+        </Link>
+      </div>
 
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -85,7 +92,7 @@ export default function PatientHistory() {
             }
           }} />
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {filteredMedicalRecords.map((record, index) => (
+            {filteredMedicalRecords!.map((record, index) => (
               <Link
                 key={index}
                 href={`/patient_info/${record.PatientID}/`}
@@ -116,11 +123,6 @@ export default function PatientHistory() {
           </p>
         </Card>
       )}
-      <div className="mb-6 text-center mt-5">
-        <Link href={`/input_page/`} passHref>
-          <Button variant="secondary">Add New Patient</Button>
-        </Link>
-      </div>
     </div>
   );
 }

@@ -3,14 +3,6 @@ import { useEffect, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
   Activity,
   ChevronDown,
   FileText,
@@ -67,6 +59,12 @@ export default function Page({ params }: { params: { patient_id: string } }) {
 
   return (
     <main className="flex-1 overflow-y-auto p-6 max-w-[1000px] mx-auto">
+
+
+      <h1 className="text-4xl font-bold text-primary pb-4">
+        Patient Details
+      </h1>
+
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {/* Patient Summary */}
         <Card className="col-span-full">
