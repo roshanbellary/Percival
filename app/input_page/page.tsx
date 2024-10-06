@@ -198,8 +198,6 @@ export default function InputPage() {
         setAudioURL(null);
         setAudioBlob(null);
         setPdfFile(null);
-        // Optionally, reset the file input value
-        document.getElementById("pdf-upload").value = "";
       } else {
         alert("Failed to submit form.");
       }
