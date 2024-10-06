@@ -61,7 +61,8 @@ export default function Page({ params }: { params: { patient_id: string } }) {
         );
         const jsonData = await patientResponse.json();
         const patient = jsonData["patient"];
-
+        console.log(patient)
+        console.log("hi")
         // Set the patient data to state
         setPatientData(patient);
 
@@ -94,7 +95,7 @@ export default function Page({ params }: { params: { patient_id: string } }) {
     patientData.FirstName.charAt(0) + patientData.LastName.charAt(0)
   ).toUpperCase();
   const patientName = [patientData.FirstName, patientData.LastName].join(" ");
-
+  console.log(patientData);
   return (
     <main className="flex-1 overflow-y-auto p-6 max-w-[1000px] mx-auto">
 
@@ -177,7 +178,7 @@ export default function Page({ params }: { params: { patient_id: string } }) {
 
           <CardContent>
             <iframe
-              src={`/${patientData.FilePath}`}
+              src={`/pdfs/${patientData.FilePath}`}
               width="100%"
               height="800"
               title="PDF Preview"
