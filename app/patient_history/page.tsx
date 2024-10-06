@@ -17,6 +17,7 @@ interface MedicalRecord {
 export default function PatientHistory() {
   const [email, setEmail] = useState("");
   const [medicalRecords, setMedicalRecords] = useState<MedicalRecord[]>([]);
+  const [filteredMedicalRecords, setFilteredMedicalRecords] = useState<MedicalRecord[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -48,6 +49,9 @@ export default function PatientHistory() {
     fetchMedicalRecords();
   }, [email]);
 
+
+
+
   return (
     <div className="container mx-auto p-4 max-w-4xl">
       <h1 className="text-3xl font-bold mb-6 text-center text-primary">
@@ -68,30 +72,42 @@ export default function PatientHistory() {
           ))}
         </div>
       ) : medicalRecords ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {medicalRecords.map((record, index) => (
-            <Link
-              key={index}
-              href={`/patient_info/${record.PatientID}/`}
-              passHref
-            >
-              <Card className="w-full hover:shadow-lg transition-shadow duration-300 cursor-pointer">
-                <CardHeader>
-                  <CardTitle className="text-lg font-semibold flex items-center">
-                    <FileText className="mr-2" size={18} />
-                    {`Patient Record: ${
-                      record.FirstName + " " + record.LastName
-                    }`}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <Button variant="outline" className="w-full">
-                    View Details
-                  </Button>
-                </CardContent>
-              </Card>
-            </Link>
-          ))}
+        <div className="grid gap-6">
+          <Input type="text" placeholder="Search for patient" onChange={(e) => {
+            const searchValue = e.target.value;
+            if (searchValue === "") {
+              setFilteredMedicalRecords(medicalRecords);
+            } else {
+              const filtered = medicalRecords.filter((record) => {
+                return record.FirstName.toLowerCase().includes(searchValue.toLowerCase()) || record.LastName.toLowerCase().includes(searchValue.toLowerCase());
+              });
+              setFilteredMedicalRecords(filtered);
+            }
+          }} />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {filteredMedicalRecords.map((record, index) => (
+              <Link
+                key={index}
+                href={`/patient_info/${record.PatientID}/`}
+                passHref
+              >
+                <Card className="w-full hover:shadow-lg transition-shadow duration-300 cursor-pointer">
+                  <CardHeader>
+                    <CardTitle className="text-lg font-semibold flex items-center">
+                      <FileText className="mr-2" size={18} />
+                      {`Patient Record: ${record.FirstName + " " + record.LastName
+                        }`}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <Button variant="outline" className="w-full">
+                      View Details
+                    </Button>
+                  </CardContent>
+                </Card>
+              </Link>
+            ))}
+          </div>
         </div>
       ) : (
         <Card className="w-full p-6 text-center">
