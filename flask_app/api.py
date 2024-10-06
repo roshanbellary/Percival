@@ -1,4 +1,4 @@
-from flask import Flask, request
+from flask import Flask, request, jsonify
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 import librosa as lb
 import torch
@@ -12,7 +12,6 @@ import json
 import tempfile
 
 app = Flask(__name__)
-CORS(app, support_credentials=True, resources={r"/*": {"origins": "http://localhost:3000"}})
 
 
 # importing whisper model
@@ -59,7 +58,7 @@ def get_transcript():
     # Combine transcription with user information
     response_text = f"First Name: {first_name}, Last Name: {last_name}, DOB: {dob}, SSN: {ssn}, Language: {language}, Transcription: {transcription}"
     
-    return {'transcription': response_text}, 200
+    return jsonify({'transcription': response_text}), 200
 
 @app.route('/upload-pdf', methods=['POST'])
 def upload_pdf():
@@ -70,14 +69,14 @@ def upload_pdf():
     language = request.form.get('language')
     pdf_file = request.form.get('pdf')
     if not pdf_file:
-        return {'message': 'No pdf file provided'}, 400
+        return jsonify({'message': 'No pdf file provided'}), 400
     reader = PdfReader(pdf_file)
     pdf_text = ""
     for page in reader.pages:
         pdf_text += page.extract_text()
     response_text = f"First Name: {first_name}, Last Name: {last_name}, DOB: {dob}, SSN: {ssn}, Language: {language}, Transcription: {pdf_text}"
     print(response_text)
-    return {'transcription': response_text}, 200
+    return jsonify({'transcription': response_text}), 200
 
 @app.route('/upload-text', methods=['POST'])
 def upload_text():
@@ -91,7 +90,7 @@ def upload_text():
                        "dob": dob, "ssn": ssn, "message": text, "language": language}
     response_text = f"First Name: {first_name}, Last Name: {last_name}, DOB: {dob}, SSN: {ssn}, Language: {language}, Transcription: {text}"
     print(response_text)
-    return {'transcription': response_text}, 200
+    return jsonify({'transcription': response_text}), 200
 
 def translate_text(text, target_language):
     """Translate text to the target language."""
