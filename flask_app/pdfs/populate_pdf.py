@@ -115,6 +115,25 @@ keys_to_gpt_map = {
 
 
 def edit_fields(filtered_json, file_to_edit, file_to_write):
+    """
+    Edits the form fields of a PDF document by updating specific field values based on the input JSON and 
+    ensures that checkboxes are appropriately marked as checked or unchecked.
+
+    Args:
+        filtered_json (dict): A dictionary where keys are field names and values indicate the desired field content.
+                              Fields can include text fields and checkboxes, with checkboxes having "checked" or "nocheck" values.
+        file_to_edit (str): The path to the input PDF file that needs to be modified.
+        file_to_write (str): The path where the edited PDF file should be written.
+
+    Functionality:
+    1. Separates the input JSON into two parts: non-checkbox fields and checkbox fields.
+    2. For checkbox fields, determines whether they should be marked as checked or unchecked and updates accordingly.
+    3. Updates non-checkbox fields in the PDF by replacing their values based on the provided JSON data.
+    4. Manually updates the checkbox fields by iterating over the PDF annotations, setting them to either "checked" (/No) or "unchecked" (/Off).
+    5. Saves the edited PDF with all updates applied to the specified output file.
+    
+    Note: This function modifies both text fields and checkboxes. The checkboxes are updated using the /V, /AS, and /DV keys in the PDF's annotations.
+    """
     reader = PdfReader(file_to_edit)
     writer = PdfWriter()
 

@@ -9,6 +9,25 @@ load_dotenv()
 
 
 def anonpdf(input_pdf, aiclient):
+    """
+    Anonymizes an Electronic Health Record (EHR) in PDF format by replacing sensitive personal information 
+    (Private Health Information, PHI) with "REDACTED" using an AI model.
+
+    Args:
+        input_pdf (str): The path to the input PDF file that needs to be anonymized.
+        aiclient (object): An instance of the AI client used for processing the anonymization task.
+
+    Returns:
+        dict: A dictionary where fields containing PHI are replaced with "REDACTED".
+    
+    Functionality:
+    1. Opens the provided PDF file and reads the form text fields.
+    2. Creates a prompt that instructs the AI to identify and redact PHI while preserving useful non-personal information.
+    3. The prompt is sent to the AI model, which returns a JSON with fields containing PHI replaced with "REDACTED".
+    4. The function returns a dictionary of redacted fields as output.
+    
+    Note: The anonymized document ensures personal health data is removed while maintaining the integrity of other medical information for research or review purposes.
+    """
     # open file
     reader = PdfReader(open(input_pdf, "rb"), strict=False)
 
