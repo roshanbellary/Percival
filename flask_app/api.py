@@ -1,4 +1,5 @@
 #!/usr/bin/python3.12
+import json
 from flask import Flask
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 import librosa as lb
@@ -8,6 +9,7 @@ from flask import request
 from flask_cors import CORS, cross_origin
 import os
 import whisper
+from pdfs.full_pdf_pipeline import create_anon_pdf
 
 app = Flask(__name__)
 a = None
@@ -39,6 +41,16 @@ def get_transcript():
 @app.route('/get-transcript', methods=['GET'])
 def return_transcript(file):
     return a
+
+@app.route('/populate-pdf', methods=['POST'])
+def populate_pdf():
+    data = request.data
+    args = data['details']
+    file_name = create_anon_pdf(args)
+    return_object = {
+        data: file_name
+    }
+    return json.stringify(return_object)
 
 def translate_text(text, target_language):
     model_name = f'Helsinki-NLP/opus-mt-en-{target_language}'
