@@ -17,6 +17,7 @@ from dotenv import load_dotenv
 # MongoDB connection setup
 load_dotenv()
 mongo_uri = os.getenv("MONGODB_URI")
+print(mongo_uri)
 client = MongoClient(mongo_uri)  # Change to your MongoDB URI
 db = client["percival"]  # Replace with your database name
 patients_collection = db["patients"]  # Define patients collection
@@ -25,6 +26,33 @@ fs = gridfs.GridFS(db)
 app = Flask(__name__)
 CORS(app, origins=["*"])
 
+@app.route('/get-patient', methods=['GET'])
+def get_patient():
+    patient_id = request.args.get('id')  # Get the patient ID from query parameters
+    
+    if not patient_id:
+        return jsonify({'message': 'Patient ID not provided'}), 400
+
+    try:
+        # Convert the patient_id to ObjectId if needed
+        patient = patients_collection.find_one({'_id': ObjectId(patient_id)})
+        
+        if not patient:
+            return jsonify({'message': 'Patient not found'}), 404
+
+        # Constructing the medical record response
+        record = {
+            'PatientID': str(patient['_id']),  # Assuming MongoDB's ObjectId is used
+            'FilePath': patient.get('file_path', ''),  # Assuming 'file_path' contains the PDF or medical file
+            'FirstName': patient['first_name'],
+            'LastName': patient['last_name'],
+            'DOB': patient.get('dob', ''),  # Adding DOB if it's part of the schema
+            'DoctorID': str(patient.get('doctor_id', ''))  # Adding DoctorID if it's part of the schema
+        }
+
+        return jsonify({'patient': record}), 200
+    except Exception as e:
+        return jsonify({'message': f'An error occurred: {str(e)}'}), 500
 
 #getting all patients for a doctor
 @app.route('/get-patients', methods=['GET'])
@@ -36,19 +64,20 @@ def get_patients():
     
     try:
         doctor = doctors_collection.find_one({'email': doctor_email})
-        
-        if not doctor:
-            return jsonify({'message': 'Doctor not found'}), 404
-        patients = list(patients_collection.find({'doctor_id': doctor['_id']}))
-        
+        doctorId = str(doctor['_id'])
+        patients = list(patients_collection.find({'doctor_id': doctorId}))
         if not patients:
             return jsonify({'message': 'No patients found for this doctor'}), 404
-        patient_list = []
+        medical_records = []
         for patient in patients:
-            patient['_id'] = str(patient['_id'])
-            patient_list.append(patient)
-
-        return jsonify({'patients': patient_list}), 200
+            record = {
+                'PatientID': str(patient['_id']),  # Assuming MongoDB's ObjectId is used
+                'FilePath': patient.get('file_path', ''),  # Assuming 'file_path' contains the PDF or medical file
+                'FirstName': patient['first_name'],
+                'LastName': patient['last_name']
+            }
+            medical_records.append(record)
+        return jsonify({'patients': medical_records}), 200
     except Exception as e:
         return jsonify({'message': f'An error occurred: {str(e)}'}), 500
 
@@ -136,11 +165,11 @@ def upload_text():
     print(response_text)
     return jsonify({'transcription': response_text}), 200
 
-def add_patient():
-    global result_text
-    if len(result_text) > 0:
-        # do pdf making code
-        # create a patient entity based upon given pdf
+# def add_patient():
+#     global result_text
+#     if len(result_text) > 0:
+#         # do pdf making code
+#         # create a patient entity based upon given pdf
     
 
 
