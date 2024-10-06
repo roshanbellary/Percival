@@ -50,7 +50,7 @@ def get_patient():
             'DOB': patient.get('dob', ''),
             'DoctorID': str(patient.get('doctor_id', ''))
         }
-        print(patient.get('file_path', ''))
+        print(patient.get('file_path', ''),)
 
         return jsonify({'patient': record}), 200
     except Exception as e:
