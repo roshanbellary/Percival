@@ -51,7 +51,7 @@ def get_patient():
         # Constructing the medical record response
         record = {
             'PatientID': str(patient['_id']),
-            'FilePath': patient.get('file_path', ''),
+            'FilePath': patient.get('pdf', ''),
             'FirstName': patient['first_name'],
             'LastName': patient['last_name'],
             'DOB': patient.get('dob', ''),
@@ -76,7 +76,6 @@ def get_patients():
         return jsonify({'message': 'Doctor email not provided'}), 400
 
     try:
-        doctor = doctors_collection.find_one({'email': doctor_email})
         # doctorId = str(doctor['_id'])
         patients = list(patients_collection.find({'doctor_id': doctor_email}))
         if not patients:
@@ -86,8 +85,7 @@ def get_patients():
             record = {
                 # Assuming MongoDB's ObjectId is used
                 'PatientID': str(patient['_id']),
-                # Assuming 'file_path' contains the PDF or medical file
-                'FilePath': patient.get('file_path', ''),
+                'FilePath': patient.get('pdf', ''),
                 'FirstName': patient['first_name'],
                 'LastName': patient['last_name']
             }
@@ -428,9 +426,9 @@ def get_all_form_fields(patient_id):
     patient = patients_collection.find_one({'_id': ObjectId(patient_id)})
     if not patient:
         return None
-    parent = str(Path(__file__).parent.parent)
+    parent = str(Path(__file__).parent.parent.parent)
     pdf_path = patient['pdf']
-    full_path = parent + "/app/public/pdfs/" + pdf_path
+    full_path = parent + "/app/public/pdf/" + pdf_path
 
     reader = PdfReader(full_path)
     # fields = reader.get_form_text_fields()

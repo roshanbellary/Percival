@@ -83,6 +83,7 @@ export default function PatientHistory() {
             </Button>
           </Link>
         </div>
+<<<<<<< HEAD
 
         <div className="relative mb-6">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-indigo-400" />
@@ -119,6 +120,23 @@ export default function PatientHistory() {
         ) : filteredMedicalRecords.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {filteredMedicalRecords.map((record, index) => (
+=======
+      ) : medicalRecords ? (
+        <div className="grid gap-6">
+          <Input type="text" placeholder="Search for patient" onChange={(e) => {
+            const searchValue = e.target.value;
+            if (searchValue === "") {
+              setFilteredMedicalRecords(medicalRecords);
+            } else {
+              const filtered = medicalRecords.filter((record) => {
+                return record.FirstName.toLowerCase().includes(searchValue.toLowerCase()) || record.LastName.toLowerCase().includes(searchValue.toLowerCase());
+              });
+              setFilteredMedicalRecords(filtered);
+            }
+          }} />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {filteredMedicalRecords?.map((record, index) => (
+>>>>>>> 45b4f4e (Changing the location of public folder to allow resource sharing)
               <Link
                 key={index}
                 href={`/patient_info/${record.PatientID}/`}
