@@ -229,5 +229,5 @@ def store_initial_fields(client, prompt):
     edit_fields(edit_json, "namedform.pdf", nonanonymized_file_name)
     print(f"Non-anonymized fields stored in file: {nonanonymized_file_name}")
 
-    return anonymized_file_name, nonanonymized_file_name
+    return anonymized_file_name 
 
