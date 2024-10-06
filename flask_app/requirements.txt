@@ -93,6 +93,7 @@ numpy==1.26.4
 oauthlib==3.2.2
 onnxruntime==1.19.2
 openai==1.51.0
+openai-whisper @ git+https://github.com/openai/whisper.git@25639fc17ddc013d56c594bfbf7644f2185fad84
 opentelemetry-api==1.27.0
 opentelemetry-exporter-otlp-proto-common==1.27.0
 opentelemetry-exporter-otlp-proto-grpc==1.27.0

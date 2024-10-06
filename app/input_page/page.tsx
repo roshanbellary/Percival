@@ -168,16 +168,26 @@ export default function InputPage() {
     } else if (inputType === "audio" && audioBlob) {
       formData.append("audio", audioBlob, "recording.wav");
     } else if (inputType === "pdf" && pdfFile) {
-      formData.append("pdf", pdfFile, pdfFile.name);
+      formData.append("pdf", pdfFile);
     }
 
     try {
-      const response = await fetch("/api/submit", {
-        method: "POST",
-        body: formData,
-      });
-
-      if (response.ok) {
+      let responseMessage = false;
+      if (inputType === "audio") {
+        console.log("hi");
+        const response = await fetch("http://127.0.0.1:5000/upload-voice/", {
+          method: "POST",
+          body: formData,
+        });
+        responseMessage = response.ok;
+      } else {
+        const response = await fetch("http://127.0.0.1:5000/boom", {
+          method: "POST",
+          body: formData,
+        });
+        responseMessage = response.ok;
+      }
+      if (responseMessage) {
         alert("Form submitted successfully!");
         // Reset form
         setFirstName("");
