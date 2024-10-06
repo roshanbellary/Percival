@@ -32,7 +32,7 @@ def get_transcript():
     last_name = request.form.get('last_name')
     dob = request.form.get('dob')
     ssn = request.form.get('ssn')
-
+    language = request.form.get('language')
     # Extract the audio file
     audio_file = request.files.get('audio')
     
@@ -57,10 +57,7 @@ def get_transcript():
     os.remove(tmp_file_path)
 
     # Combine transcription with user information
-    response_text = (
-        f"First Name: {first_name}, Last Name: {last_name}, "
-        f"DOB: {dob}, SSN: {ssn}, Transcription: {transcription}"
-    )
+    response_text = f"First Name: {first_name}, Last Name: {last_name}, DOB: {dob}, SSN: {ssn}, Language: {language}, Transcription: {transcription}"
     
     return {'transcription': response_text}, 200
 
@@ -88,9 +85,12 @@ def upload_text():
     ssn = request.form.get('ssn')
     text = request.form.get('message')
     language = request.form.get('language')
+    result = {"first_name": first_name, "last_name": last_name,
+                       "dob": dob, "ssn": ssn, "message": text, "language": language}
+    response_text = f"First Name: {first_name}, Last Name: {last_name}, DOB: {dob}, SSN: {ssn}, Language: {language}, Transcription: {text}"
+    print(response_text)
     return json.dumps({"first_name": first_name, "last_name": last_name,
                        "dob": dob, "ssn": ssn, "message": text, "language": language})
-
 
 def translate_text(text, target_language):
     """Translate text to the target language."""
