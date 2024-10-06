@@ -5,6 +5,7 @@ import os
 from dotenv import load_dotenv
 import json
 
+
 load_dotenv()
 
 reader = PdfReader("namedform.pdf")
@@ -68,7 +69,7 @@ keys_to_gpt_map = {
     'ks_date': 'If ks_checkbox is checked, the date of the Kaposi sarcoma',
     'other_opportunistics_infections_checkbox': '(checkbox) Opportunistic infection. If the patient has other opportunistic infections',
     'other_opportunistic_infections': 'The other opportunistic infections the patient has, if other_opportunistics_infections_checkbox is checked',
-    'other_opportunistic_infections_date': 'The date of the other opportunistic infections, if other_opportunistics_infections_checkbox is checked', 
+    'other_opportunistic_infections_date': 'The date of the other opportunistic infections, if other_opportunistics_infections_checkbox is checked',
     'current_symptoms_1': 'List of other current symptoms the patient has (first line, max 5 words)',
     'current_symptoms_2': 'Continuation of the list of other current symptoms the patient has (second line, max 20 words)',
     'cd4_cell_count': 'CD4 cell count of the patient',
@@ -95,9 +96,9 @@ keys_to_gpt_map = {
     'skilled_nursing_care_checkbox_no': '(checkbox) Does this patient meet the nursing facility level of care? Only check if no',
     'dental_checkbox_no': '(checkbox) Is this patient medically able to receive routine dental care and/or oral procedures? Only check if no',
     'dental_checkbox_yes': '(checkbox) Is this patient medically able to receive routine dental care and/or oral procedures? Only check if yes',
-    'tuberculosis_checkbox_no': '(checkbox) Has this patient been screened for tuberculosis? Only check if no', 
+    'tuberculosis_checkbox_no': '(checkbox) Has this patient been screened for tuberculosis? Only check if no',
     'tuberculosis_checkbox_yes': '(checkbox) Has this patient been screened for tuberculosis? Only check if yes',
-    'tb_skin_text_checkbox_positive': '(checkbox) TB skin test result. Only check if positive', 
+    'tb_skin_text_checkbox_positive': '(checkbox) TB skin test result. Only check if positive',
     'tb_skin_text_checkbox_negative': '(checkbox) TB skin test result. Only check if negative',
     'tb_chest_xray_checkbox_positive': '(checkbox) TB chest x-ray result. Only check if positive',
     'tb_chest_xray_checkbox_negative': '(checkbox) TB chest x-ray result. Only check if negative',
@@ -106,7 +107,7 @@ keys_to_gpt_map = {
     'receiving_preventative_tb_treatment_checkbox': '(checkbox) Is the patient receiving preventative TB treatment.',
     'not_receiving_tb_treatment_checkbox': '(checkbox) If the patient is not receiving preventative TB treatment.',
     'receiving_active_tb_treatment_checkbox': '(checkbox) Is the patient receiving active TB treatment.',
-    'noncompliant_with_recommended_tb_treatment': '(checkbox) If the patient is noncompliant with recommended TB treatment.', 
+    'noncompliant_with_recommended_tb_treatment': '(checkbox) If the patient is noncompliant with recommended TB treatment.',
     'physician_signature': 'Name of the physician (digital signature)',
     'date_completed': 'Current date',
     'physician_name': 'Name of the physician',
@@ -117,11 +118,12 @@ keys_to_gpt_map = {
     'state': 'State of the physician',
     'additional_comments': 'Additional comments FOR THE PHYSICIAN OR PATIENT',
     'GPT_ADDITIONAL': 'Assumptions you made while filling ouit this form (as a list), or additional comments not covered by the form',
-    }
+}
 
 fields_json_str = json.dumps(keys_to_gpt_map, indent=4)
 
-FINAL_PARSE_GPT_PROMPT = PARSE_GPT_PROMPT_TEMPLATE.replace("<FIELDS>", fields_json_str)
+FINAL_PARSE_GPT_PROMPT = PARSE_GPT_PROMPT_TEMPLATE.replace(
+    "<FIELDS>", fields_json_str)
 
 test_input = """
 The patient's name is Roshan Bellary. The Physican's name is Dr. Pulkith Paruchuri. The address is
@@ -147,35 +149,37 @@ client = OpenAI(
 
 )
 
-# chat_completion = client.chat.completions.create(
-#     messages=[
-#         {
-#             "role": "system",
-#             "content": FINAL_PARSE_GPT_PROMPT,
-#         },
-#         {
-#             "role": "user",
-#             "content": test_input,
-#         }
-#     ],
-#     model="gpt-4o-mini-2024-07-18",
-# )
-# reply_json_str = chat_completion.choices[0].message.content
+chat_completion = client.chat.completions.create(
+    messages=[
+        {
+            "role": "system",
+            "content": FINAL_PARSE_GPT_PROMPT,
+        },
+        {
+            "role": "user",
+            "content": test_input,
+        }
+    ],
+    model="gpt-4o-mini-2024-07-18",
+)
+reply_json_str = chat_completion.choices[0].message.content
 # write to file
-# with open("filled-out.json", "w") as f:
-#     f.write(reply_json_str)
+# # with open("filled-out.json", "w") as f:
+# #     f.write(reply_json_str)
 
-# read back from file
-with open("filled-out.json", "r") as f:
-    reply_json_str = f.read()
+# # read back from file
+# with open("filled-out.json", "r") as f:
+#     reply_json_str = f.read()
 
 reply_json = json.loads(reply_json_str)
 
 # Filter empty elements
 filtered_json = {k: v for k, v in reply_json.items() if len(v) > 0}
 
-noncheck_fields = {k: v for k, v in filtered_json.items() if not ("checked" in v or "nocheck" in v)}
-check_fields = {k: v for k, v in filtered_json.items() if "checked" in v or "nocheck" in v}
+noncheck_fields = {k: v for k, v in filtered_json.items() if not (
+    "checked" in v or "nocheck" in v)}
+check_fields = {k: v for k, v in filtered_json.items(
+) if "checked" in v or "nocheck" in v}
 
 # update all checked to /On and unchecked to /Off
 for k, v in check_fields.items():
@@ -183,7 +187,7 @@ for k, v in check_fields.items():
         # Makes no sense but No is checked
         check_fields[k] = "/No"
     else:
-        #To-Do fix this
+        # To-Do fix this
         check_fields[k] = "/Off"
 
 
@@ -198,19 +202,19 @@ writer.update_page_form_field_values(
     auto_regenerate=True,
 )
 
-# writer.update_page_form_field_values(
-#     writer.pages[0],
-#     check_fields,
-#     auto_regenerate=False,
-# )
+writer.update_page_form_field_values(
+    writer.pages[0],
+    check_fields,
+    auto_regenerate=False,
+)
 
 # Manually iterate over checkboxes and update their values
 for annotation in writer.pages[0]["/Annots"]:
     field = annotation.get_object()
-    
+
     # Get the field name
     field_name = field.get("/T")
-    
+
     if field_name in check_fields:
         # Set the checkbox value to /Yes (checked) or /Off (unchecked)
         if check_fields[field_name] == "/No":
@@ -236,12 +240,13 @@ for field_name, field_info in noncheck_fields.items():
 for annotation in writer.pages[0]["/Annots"]:
     field = annotation.get_object()
     field_name = field.get("/T")
-    
+
     if field_name in check_fields:
         # Get the current value and appearance state of the checkbox
         checkbox_value = field.get("/V", "No Value")
         appearance_state = field.get("/AS", "No Appearance State")
-        print(f"Checkbox Field '{field_name}': Value = {checkbox_value}, Appearance State = {appearance_state}")
+        print(
+            f"Checkbox Field '{field_name}': Value = {checkbox_value}, Appearance State = {appearance_state}")
 
 # Save the updated PDF with checkboxes checked
 with open("filled-out.pdf", "wb") as output_stream:
