@@ -30,9 +30,11 @@ export default function PatientHistory() {
         if (email) {
             try {
             setIsLoading(true)
-            const response = await fetch(`https://d1-tutorial.cows.workers.dev/api/doctor/${email}/get-files`)
+            //const prevLink = `https://d1-tutorial.cows.workers.dev/api/doctor/${email}/get-files`;
+            const response = await fetch(`http://127.0.0.1:5000/get-patients?email=${email}`);
             const data = await response.json()
-            setMedicalRecords(data)
+            console.log(data)
+            setMedicalRecords(data['patients'])
             } catch (error) {
             console.error("Failed to fetch medical records:", error)
             } finally {
@@ -60,7 +62,7 @@ export default function PatientHistory() {
                 </Card>
             ))}
             </div>
-        ) : medicalRecords.length > 0 ? (
+        ) : medicalRecords ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {medicalRecords.map((record, index) => (
                 <Link key={index} href={`/patient_info/${record.PatientID}/`} passHref>

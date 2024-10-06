@@ -6,8 +6,8 @@ import { Activity, ChevronDown, FileText, Heart, Home, Menu, User, Users } from 
 export default async function Page({ params }: { params: { patient_id: string } }) {
 
 
-
-  const patientResponse = await fetch(`https://d1-tutorial.cows.workers.dev/api/patient/${params.patient_id}/get-info`)
+  // prev link: https://d1-tutorial.cows.workers.dev/api/patient/${params.patient_id}/get-info
+  const patientResponse = await fetch(`http://127.0.0.1:5000/get-patient/${params.patient_id}`)
   const patientData = await patientResponse.json()
 
   //     [
