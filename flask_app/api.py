@@ -12,7 +12,7 @@ import json
 import tempfile
 
 app = Flask(__name__)
-
+CORS(app, origins=["*"])
 
 # importing whisper model
 model = whisper.load_model("base")
