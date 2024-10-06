@@ -6,6 +6,67 @@ import { useState, useEffect, useRef } from "react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Mic, Send, File } from "lucide-react";
 
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+
+import { Check, ChevronsUpDown } from "lucide-react"
+import { cn } from "@/lib/utils"
+
+const frameworks = [
+  { value: "english", label: "English" },
+  { value: "amharic", label: "Amharic" },
+  { value: "arabic", label: "Arabic" },
+  { value: "bengali", label: "Bengali" },
+  { value: "burmese", label: "Burmese" },
+  { value: "chinese", label: "Chinese" },
+  { value: "filipino", label: "Filipino" },
+  { value: "french", label: "French" },
+  { value: "german", label: "German" },
+  { value: "gujarati", label: "Gujarati" },
+  { value: "hausa", label: "Hausa" },
+  { value: "hindi", label: "Hindi" },
+  { value: "igbo", label: "Igbo" },
+  { value: "indonesian", label: "Indonesian" },
+  { value: "italian", label: "Italian" },
+  { value: "japanese", label: "Japanese" },
+  { value: "javanese", label: "Javanese" },
+  { value: "korean", label: "Korean" },
+  { value: "lahnda", label: "Lahnda (Western Punjabi)" },
+  { value: "malayalam", label: "Malayalam" },
+  { value: "marathi", label: "Marathi" },
+  { value: "oromo", label: "Oromo" },
+  { value: "persian", label: "Persian (Farsi)" },
+  { value: "polish", label: "Polish" },
+  { value: "portuguese", label: "Portuguese" },
+  { value: "romanian", label: "Romanian" },
+  { value: "russian", label: "Russian" },
+  { value: "serbo-croatian", label: "Serbo-Croatian" },
+  { value: "spanish", label: "Spanish" },
+  { value: "sundanese", label: "Sundanese" },
+  { value: "swahili", label: "Swahili" },
+  { value: "tamil", label: "Tamil" },
+  { value: "telugu", label: "Telugu" },
+  { value: "thai", label: "Thai" },
+  { value: "turkish", label: "Turkish" },
+  { value: "ukrainian", label: "Ukrainian" },
+  { value: "urdu", label: "Urdu" },
+  { value: "uzbek", label: "Uzbek" },
+  { value: "vietnamese", label: "Vietnamese" },
+  { value: "yoruba", label: "Yoruba" },
+];
+
+
 export default function InputPage() {
   const [inputType, setInputType] = useState("text"); // To toggle between 'text', 'audio', and 'pdf'
   const [message, setMessage] = useState("");
@@ -13,6 +74,8 @@ export default function InputPage() {
   const [lastName, setLastName] = useState("");
   const [dob, setDob] = useState("");
   const [ssn, setSsn] = useState("");
+  const [language, setLanguage] = useState("english");
+  const [languageComboboxOpen, setLanguageComboboxOpen] = useState(false)
   const [isRecording, setIsRecording] = useState(false);
   const [audioURL, setAudioURL] = useState(null);
   const [audioBlob, setAudioBlob] = useState(null);
@@ -79,7 +142,7 @@ export default function InputPage() {
       setPdfFile(file);
     }
   };
-  useEffect( () => {
+  useEffect(() => {
     if (inputType != "audio") {
       setAudioBlob(null);
       setAudioURL(null);
@@ -195,6 +258,60 @@ export default function InputPage() {
                 className="w-full px-3 py-2 border border-gray-300 rounded"
                 required
               />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="language" className="block text-lg font-medium">Language</Label>
+
+              <Popover open={languageComboboxOpen} onOpenChange={setLanguageComboboxOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={languageComboboxOpen}
+                    className="w-[450px] justify-between"
+                  >
+                    {language
+                      ? frameworks.find((framework) => framework.value === language)?.label
+                      : "Select language..."}
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-[450px] p-0">
+                  <Command>
+                    <CommandInput placeholder="Search language..." />
+                    <CommandList>
+                      <CommandEmpty>No language found.</CommandEmpty>
+                      <CommandGroup>
+                        {frameworks.map((framework) => (
+                          <CommandItem
+                            key={framework.value}
+                            value={framework.value}
+                            onSelect={(currentValue) => {
+                              setLanguage(currentValue === language ? "" : currentValue)
+                              setLanguageComboboxOpen(false)
+                            }}
+                          >
+                            <Check
+                              className={cn(
+                                "mr-2 h-4 w-4",
+                                language === framework.value ? "opacity-100" : "opacity-0"
+                              )}
+                            />
+                            {framework.label}
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
+
+
+
+
+
+
             </div>
 
             {/* Input Type Toggle */}
