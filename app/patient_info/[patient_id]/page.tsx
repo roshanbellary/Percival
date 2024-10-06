@@ -177,7 +177,7 @@ export default function Page({ params }: { params: { patient_id: string } }) {
 
           <CardContent>
             <iframe
-              src={`/public/${patientData.FilePath}`}
+              src={`/${patientData.FilePath}`}
               width="100%"
               height="800"
               title="PDF Preview"
