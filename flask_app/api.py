@@ -13,6 +13,7 @@ import tempfile
 from pymongo import MongoClient
 import gridfs
 import os
+from bson import ObjectId
 from dotenv import load_dotenv
 # MongoDB connection setup
 load_dotenv()
@@ -28,27 +29,28 @@ CORS(app, origins=["*"])
 
 @app.route('/get-patient', methods=['GET'])
 def get_patient():
-    patient_id = request.args.get('id')  # Get the patient ID from query parameters
-    
+    patient_id = request.args.get('id')
+    print("hi " + str(patient_id))
     if not patient_id:
         return jsonify({'message': 'Patient ID not provided'}), 400
 
     try:
         # Convert the patient_id to ObjectId if needed
         patient = patients_collection.find_one({'_id': ObjectId(patient_id)})
-        
+        print(patient)
         if not patient:
             return jsonify({'message': 'Patient not found'}), 404
 
         # Constructing the medical record response
         record = {
-            'PatientID': str(patient['_id']),  # Assuming MongoDB's ObjectId is used
-            'FilePath': patient.get('file_path', ''),  # Assuming 'file_path' contains the PDF or medical file
+            'PatientID': str(patient['_id']), 
+            'FilePath': patient.get('file_path', ''),
             'FirstName': patient['first_name'],
             'LastName': patient['last_name'],
-            'DOB': patient.get('dob', ''),  # Adding DOB if it's part of the schema
-            'DoctorID': str(patient.get('doctor_id', ''))  # Adding DoctorID if it's part of the schema
+            'DOB': patient.get('dob', ''),
+            'DoctorID': str(patient.get('doctor_id', ''))
         }
+        print(patient.get('file_path', ''))
 
         return jsonify({'patient': record}), 200
     except Exception as e:
