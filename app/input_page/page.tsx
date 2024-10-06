@@ -1,5 +1,5 @@
 "use client";
-import { Loader2, Mic, Send, File, Check, ChevronsUpDown } from "lucide-react"
+import { Loader2, Mic, Send, File, Check, ChevronsUpDown } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -65,7 +65,7 @@ const frameworks = [
 ];
 
 export default function InputPage() {
-  const router = useRouter()
+  const router = useRouter();
   const [inputType, setInputType] = useState("text");
   const [message, setMessage] = useState("");
   const [firstName, setFirstName] = useState("");
@@ -200,7 +200,7 @@ export default function InputPage() {
         responseMessage = response.ok;
       }
       if (responseMessage) {
-        const { patientId } = await response.json()
+        const { patientId } = await response.json();
         setFirstName("");
         setLastName("");
         setDob("");
@@ -212,7 +212,6 @@ export default function InputPage() {
         setSubmitting(false);
 
         router.push(`/patient_info/${patientId}`);
-
       } else {
         setSubmitting(false);
         alert("Failed to submit form.");
@@ -233,7 +232,10 @@ export default function InputPage() {
         <form className="space-y-6" onSubmit={handleSubmit}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <Label htmlFor="first-name" className="text-lg font-medium text-indigo-700">
+              <Label
+                htmlFor="first-name"
+                className="text-lg font-medium text-indigo-700"
+              >
                 First Name
               </Label>
               <input
@@ -247,7 +249,10 @@ export default function InputPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="last-name" className="text-lg font-medium text-indigo-700">
+              <Label
+                htmlFor="last-name"
+                className="text-lg font-medium text-indigo-700"
+              >
                 Last Name
               </Label>
               <input
@@ -264,7 +269,10 @@ export default function InputPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <Label htmlFor="dob" className="text-lg font-medium text-indigo-700">
+              <Label
+                htmlFor="dob"
+                className="text-lg font-medium text-indigo-700"
+              >
                 Date of Birth
               </Label>
               <input
@@ -277,7 +285,10 @@ export default function InputPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="ssn" className="text-lg font-medium text-indigo-700">
+              <Label
+                htmlFor="ssn"
+                className="text-lg font-medium text-indigo-700"
+              >
                 SSN
               </Label>
               <input
@@ -293,7 +304,10 @@ export default function InputPage() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="language" className="block text-lg font-medium text-indigo-700">
+            <Label
+              htmlFor="language"
+              className="block text-lg font-medium text-indigo-700"
+            >
               Language
             </Label>
             <Popover
@@ -309,8 +323,8 @@ export default function InputPage() {
                 >
                   {language
                     ? frameworks.find(
-                      (framework) => framework.value === language
-                    )?.label
+                        (framework) => framework.value === language
+                      )?.label
                     : "Select language..."}
                   <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
@@ -351,7 +365,10 @@ export default function InputPage() {
           </div>
 
           <div className="space-y-4">
-            <Label htmlFor="input-type" className="text-lg font-medium text-indigo-700">
+            <Label
+              htmlFor="input-type"
+              className="text-lg font-medium text-indigo-700"
+            >
               Choose Input Type
             </Label>
             <RadioGroup
@@ -377,7 +394,10 @@ export default function InputPage() {
 
           {inputType === "text" && (
             <div className="space-y-2">
-              <Label htmlFor="patient-info" className="text-lg font-medium text-indigo-700">
+              <Label
+                htmlFor="patient-info"
+                className="text-lg font-medium text-indigo-700"
+              >
                 Input Patient Information
               </Label>
               <Textarea
@@ -393,7 +413,9 @@ export default function InputPage() {
 
           {inputType === "audio" && (
             <div className="space-y-4">
-              <Label className="text-lg font-medium text-indigo-700">Record Audio</Label>
+              <Label className="text-lg font-medium text-indigo-700">
+                Record Audio
+              </Label>
               <Button
                 type="button"
                 variant={isRecording ? "destructive" : "default"}
@@ -412,7 +434,9 @@ export default function InputPage() {
               </Button>
               {audioURL && (
                 <div className="space-y-2">
-                  <Label className="text-lg font-medium text-indigo-700">Your Recording:</Label>
+                  <Label className="text-lg font-medium text-indigo-700">
+                    Your Recording:
+                  </Label>
                   <audio controls src={audioURL} className="w-full">
                     Your browser does not support the audio element.
                   </audio>
@@ -447,7 +471,8 @@ export default function InputPage() {
           )}
 
           {submitting ? (
-            <Button disabled
+            <Button
+              disabled
               className="w-full py-6 text-lg flex items-center justify-center bg-indigo-400 text-white"
             >
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />

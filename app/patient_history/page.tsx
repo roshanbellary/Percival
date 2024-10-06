@@ -35,7 +35,9 @@ export const LoadingSpinner = ({ className }: { className?: string }) => (
 export default function PatientHistory() {
   const [email, setEmail] = useState("");
   const [medicalRecords, setMedicalRecords] = useState<MedicalRecord[]>([]);
-  const [filteredMedicalRecords, setFilteredMedicalRecords] = useState<MedicalRecord[]>([]);
+  const [filteredMedicalRecords, setFilteredMedicalRecords] = useState<
+    MedicalRecord[]
+  >([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -68,7 +70,13 @@ export default function PatientHistory() {
   }, [email]);
 
   const getColorForPatient = (index: number) => {
-    const colors = ['bg-blue-500', 'bg-green-500', 'bg-purple-500', 'bg-pink-500', 'bg-yellow-500'];
+    const colors = [
+      "bg-blue-500",
+      "bg-green-500",
+      "bg-purple-500",
+      "bg-pink-500",
+      "bg-yellow-500",
+    ];
     return colors[index % colors.length];
   };
 
@@ -95,7 +103,14 @@ export default function PatientHistory() {
                 setFilteredMedicalRecords(medicalRecords);
               } else {
                 const filtered = medicalRecords.filter((record) => {
-                  return record.FirstName.toLowerCase().includes(searchValue.toLowerCase()) || record.LastName.toLowerCase().includes(searchValue.toLowerCase());
+                  return (
+                    record.FirstName.toLowerCase().includes(
+                      searchValue.toLowerCase()
+                    ) ||
+                    record.LastName.toLowerCase().includes(
+                      searchValue.toLowerCase()
+                    )
+                  );
                 });
                 setFilteredMedicalRecords(filtered);
               }
@@ -124,7 +139,10 @@ export default function PatientHistory() {
                 href={`/patient_info/${record.PatientID}/`}
                 passHref
               >
-                <Card className="w-full hover:shadow-md transition-shadow duration-200 overflow-hidden border-l-4 cursor-pointer" style={{ borderLeftColor: getColorForPatient(index) }}>
+                <Card
+                  className="w-full hover:shadow-md transition-shadow duration-200 overflow-hidden border-l-4 cursor-pointer"
+                  style={{ borderLeftColor: getColorForPatient(index) }}
+                >
                   <CardHeader className="pb-2">
                     <CardTitle className="text-lg font-semibold text-gray-800 flex items-center">
                       <FileText className="mr-2" size={18} />
@@ -133,14 +151,27 @@ export default function PatientHistory() {
                   </CardHeader>
                   <CardContent>
                     <div className="flex items-center space-x-4">
-                      <Avatar className={`h-12 w-12 ${getColorForPatient(index)} text-white`}>
-                        <AvatarFallback className={getColorForPatient(index)}>{record.FirstName[0]}{record.LastName[0]}</AvatarFallback>
+                      <Avatar
+                        className={`h-12 w-12 ${getColorForPatient(
+                          index
+                        )} text-white`}
+                      >
+                        <AvatarFallback className={getColorForPatient(index)}>
+                          {record.FirstName[0]}
+                          {record.LastName[0]}
+                        </AvatarFallback>
                       </Avatar>
                       <div className="flex-1">
-                        <p className="text-sm text-gray-500 truncate text-ellipsis">ID: {record.PatientID.toString().slice(0, 15)}...</p>
+                        <p className="text-sm text-gray-500 truncate text-ellipsis">
+                          ID: {record.PatientID.toString().slice(0, 15)}...
+                        </p>
                       </div>
                       <div className="flex-grow"></div>
-                      <Button variant="outline" size="sm" className="text-indigo-600 border-indigo-300 hover:bg-indigo-50">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="text-indigo-600 border-indigo-300 hover:bg-indigo-50"
+                      >
                         View Details
                       </Button>
                     </div>

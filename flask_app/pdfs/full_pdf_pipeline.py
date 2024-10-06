@@ -30,18 +30,19 @@ def create_anon_pdf(configs):
 
     prompt_gen = make_gen_prompt(configs)
     file_stored = store_initial_fields(client, prompt_gen)
-    nonanon_file_loc = parent + "/app/public/pdfs/" + file_stored
+    nonanon_file_loc = parent + "/public/pdfs/" + file_stored
     anon_json = anonpdf(nonanon_file_loc, client)
 
     for key, value in anon_json.items():
         anon_json[key] = "[" + value + "]"
 
     # Fill out the output PDF with the anonymized fields
-    anon_file_loc = parent + "/app/public/anonpdfs/" + file_stored
+    anon_file_loc = parent + "/public/anonpdfs/" + file_stored
 
     edit_fields(anon_json, nonanon_file_loc, anon_file_loc)
 
     return file_stored
+
 
 def anonymize_pdf(file_name, client):
     """
@@ -60,8 +61,8 @@ def anonymize_pdf(file_name, client):
     parent = str(Path(__file__).parent.parent.parent)
 
     # Get public PDF location
-    nonanon_file_loc = parent + "/app/public/pdfs/" + file_name
-    
+    nonanon_file_loc = parent + "/public/pdfs/" + file_name
+
     # Get anonymized fields
     anon_json = anonpdf(nonanon_file_loc, client)
 
@@ -69,16 +70,14 @@ def anonymize_pdf(file_name, client):
         anon_json[key] = "[" + value + "]"
 
     # Fill out the output PDF with the anonymized fields
-    anon_file_loc = parent + "/app/public/anonpdfs/" + file_name
-    
+    anon_file_loc = parent + "/public/anonpdfs/" + file_name
+
     try:
         edit_fields(anon_json, nonanon_file_loc, anon_file_loc)
     except (IOError, OSError) as e:
         print(f"Error editing fields in PDF: {e}")
     except Exception as e:
         print(f"An unexpected error occurred: {e}")
-
-
 
 
 # config = {

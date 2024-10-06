@@ -8,15 +8,9 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button"
-import {
-  Activity,
-  FileText,
-  Heart,
-  User,
-  Download,
-} from "lucide-react";
-
+import { Button } from "@/components/ui/button";
+import { Activity, FileText, Heart, User, Download } from "lucide-react";
+import { trace } from "console";
 interface MedicalRecord {
   PatientID: number;
   FilePath: string;
@@ -54,6 +48,7 @@ export default function Page({ params }: { params: { patient_id: string } }) {
   const [treatments, setTreatments] = useState<{} | null>(null);
   const downloadRef = useRef<HTMLAnchorElement>(null);
   const anonDownloadRef = useRef<HTMLAnchorElement>(null);
+  const [overvoew, setOverview] = useState<{}>(null); // Initialize state
 
   const handleDownload = (ref: React.RefObject<HTMLAnchorElement>) => {
     if (ref.current) {
@@ -71,12 +66,25 @@ export default function Page({ params }: { params: { patient_id: string } }) {
         const patient = jsonData["patient"];
         setPatientData(patient);
 
-        const treatments = await fetch(
+        const ovData = await fetch(
+          `http://127.0.0.1:8000/get-overview?id=${params.patient_id}`
+        );
+        const ovJSON = await ovData.json();
+
+        setOverview(ovJSON);
+        console.log(ovJSON);
+
+        const tData = await fetch(
           `http://127.0.0.1:8000/get-patient-treatments?patient_id=${params.patient_id}`
         );
-        const treatmentsData = await treatments.json();
-        console.log(treatmentsData);
-        setTreatments(treatmentsData);
+
+        const treatmentsData = await tData.json();
+        // console.log(treatmentsData.treatments);
+        // conver to object
+
+        const treatment_obj = JSON.parse(treatmentsData.treatments);
+
+        setTreatments(treatment_obj);
 
         if (patient && patient.FilePath) {
           console.log("File Path:", patient.FilePath);
@@ -101,7 +109,13 @@ export default function Page({ params }: { params: { patient_id: string } }) {
     patientData.FirstName.charAt(0) + patientData.LastName.charAt(0)
   ).toUpperCase();
   const patientName = [patientData.FirstName, patientData.LastName].join(" ");
+  function formatDate(date) {
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = String(date.getFullYear()).slice(-2);
 
+    return `${day}/${month}/${year}`;
+  }
   return (
     <main className="min-h-screen bg-gradient-to-br from-indigo-100 to-white p-6">
       <div className="max-w-6xl mx-auto">
@@ -120,7 +134,9 @@ export default function Page({ params }: { params: { patient_id: string } }) {
                 </AvatarFallback>
               </Avatar>
               <div>
-                <CardTitle className="text-2xl text-indigo-800">{patientName}</CardTitle>
+                <CardTitle className="text-2xl text-indigo-800">
+                  {patientName}
+                </CardTitle>
                 <CardDescription className="text-indigo-600">
                   Patient ID: {patientData.PatientID}
                 </CardDescription>
@@ -136,15 +152,22 @@ export default function Page({ params }: { params: { patient_id: string } }) {
                 </div>
                 <div className="flex items-center space-x-2 bg-indigo-50 p-3 rounded-lg">
                   <Activity className="h-5 w-5 text-indigo-600" />
-                  <span className="text-sm text-indigo-800">Activity: N/A</span>
+                  <span className="text-sm text-indigo-800">
+                    CD4 Count: {overvoew && overvoew["cd4"]}
+                  </span>
                 </div>
                 <div className="flex items-center space-x-2 bg-indigo-50 p-3 rounded-lg">
                   <Heart className="h-5 w-5 text-indigo-600" />
-                  <span className="text-sm text-indigo-800">Heart Rate: N/A</span>
+                  <span className="text-sm text-indigo-800">
+                    SSN (last 4): {overvoew && overvoew["last4ssn"]}
+                  </span>
                 </div>
                 <div className="flex items-center space-x-2 bg-indigo-50 p-3 rounded-lg">
                   <FileText className="h-5 w-5 text-indigo-600" />
-                  <span className="text-sm text-indigo-800">Last Diagnosis: -</span>
+                  <span className="text-sm text-indigo-800">
+                    Last Diagnosis:{" "}
+                    {overvoew && formatDate(new Date(overvoew["lastDate"]))}
+                  </span>
                 </div>
               </div>
             </CardContent>
@@ -153,37 +176,49 @@ export default function Page({ params }: { params: { patient_id: string } }) {
           {/* Vital Statistics */}
           <Card className="bg-white shadow-md hover:shadow-lg transition-shadow duration-300">
             <CardHeader>
-              <CardTitle className="text-indigo-700">HIV / AIDS Diagnosis</CardTitle>
+              <CardTitle className="text-indigo-700">
+                HIV / AIDS Diagnosis
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-indigo-600">N/A</div>
-              <p className="text-sm text-indigo-400">Last measured: -</p>
+              <div className="text-3xl font-bold text-indigo-600">
+                {overvoew && overvoew["isPositive"] ? "Positive" : "Negative"}
+              </div>
+              {/* <p className="text-sm text-indigo-400">Last measured: -</p> */}
             </CardContent>
           </Card>
           <Card className="bg-white shadow-md hover:shadow-lg transition-shadow duration-300">
             <CardHeader>
-              <CardTitle className="text-indigo-700">CD4 Count</CardTitle>
+              <CardTitle className="text-indigo-700">Karnofsky</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-indigo-600">N/A</div>
-              <p className="text-sm text-indigo-400">Last measured: -</p>
+              <div className="text-3xl font-bold text-indigo-600">
+                {overvoew && overvoew["scale"]}
+              </div>
+              {/* <p className="text-sm text-indigo-400">Last measured: -</p> */}
             </CardContent>
           </Card>
           <Card className="bg-white shadow-md hover:shadow-lg transition-shadow duration-300">
             <CardHeader>
-              <CardTitle className="text-indigo-700">HIV Viral Load</CardTitle>
+              <CardTitle className="text-indigo-700">Stage</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-indigo-600">N/A</div>
-              <p className="text-sm text-indigo-400">Last measured: -</p>
+              <div className="text-3xl font-bold text-indigo-600">
+                {overvoew && overvoew["stage"]}
+              </div>
+              {/* <p className="text-sm text-indigo-400">Last measured: -</p> */}
             </CardContent>
           </Card>
 
           {/* Electronic Health Record */}
           <Card className="col-span-full bg-white shadow-lg hover:shadow-xl transition-shadow duration-300">
             <CardHeader>
-              <CardTitle className="text-2xl text-indigo-800">Electronic Health Record</CardTitle>
-              <CardDescription className="text-indigo-600">Automated APLA Diagnosis Form</CardDescription>
+              <CardTitle className="text-2xl text-indigo-800">
+                Electronic Health Record
+              </CardTitle>
+              <CardDescription className="text-indigo-600">
+                Automated APLA Diagnosis Form
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <iframe
@@ -229,7 +264,7 @@ export default function Page({ params }: { params: { patient_id: string } }) {
           </Card>
 
           {/* Similar Patients */}
-          <Card className="col-span-full bg-white shadow-lg hover:shadow-xl transition-shadow duration-300">
+          {/* <Card className="col-span-full bg-white shadow-lg hover:shadow-xl transition-shadow duration-300">
             <CardHeader>
               <CardTitle className="text-2xl text-indigo-800">Similar Patients</CardTitle>
               <CardDescription className="text-indigo-600">
@@ -243,6 +278,99 @@ export default function Page({ params }: { params: { patient_id: string } }) {
                 </div>
               ) : (
                 <div className="text-indigo-700">No treatments data available</div>
+              )}
+            </CardContent>
+          </Card> */}
+          <Card className="col-span-full">
+            <CardHeader>
+              <CardTitle>Similar Patients</CardTitle>
+              <CardDescription>
+                Treatments Recommended to Similar Patient Profiles
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {!treatments ? (
+                <div style={{ display: "flex", justifyContent: "center" }}>
+                  <LoadingSpinner />
+                </div>
+              ) : (
+                <div>
+                  {/* {Make cards with each name and confidence percntage } */}
+                  <div style={{ display: "flex", width: "100%" }}>
+                    <div
+                      style={{
+                        width: "90%",
+                        height: "30px",
+                        display: "flex",
+                        alignItems: "center",
+                      }}
+                      className="text-sm text-gray-500"
+                    >
+                      Treatment
+                    </div>
+                    <div
+                      style={{
+                        width: "10%",
+                        display: "flex",
+                        justifyContent: "center",
+                      }}
+                      className="text-sm text-gray-500"
+                    >
+                      Confidence
+                    </div>
+                  </div>
+                  {Object.keys(treatments).map((key) => {
+                    return (
+                      <div style={{ display: "flex", width: "100%" }}>
+                        <div
+                          style={{
+                            width: "90%",
+                            height: "30px",
+                            display: "flex",
+                            alignItems: "center",
+                            // className="text-sm text-gray-500"
+                          }}
+                          // className="text-sm text-gray-500"
+                        >
+                          {key}
+                        </div>
+                        <div
+                          style={{
+                            width: "10%",
+                            display: "flex",
+                            justifyContent: "center",
+                          }}
+                          className="text-sm text-gray-500"
+                        >
+                          {Math.max(0.99, (treatments[key] / 5) * 1) * 100}%
+                        </div>
+                      </div>
+                      // <Card className="col-span-full">
+                      //   <CardHeader>{key}</CardHeader>
+                      //   <CardDescription>
+                      //     <div key={key} className="flex items-center space-x-2">
+                      //       <span className="text-sm text-gray-500">
+                      //         {Math.max(0.95, (treatments[key] / 5) * 1.5) * 100}%
+                      //       </span>
+                      //     </div>
+                      //   </CardDescription>
+                      // </Card>
+                    );
+                  })}
+
+                  {/* <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+                  {Object.keys(treatments).map((key) => {
+                    return (
+                      <div key={key} className="flex items-center space-x-2">
+                        <span className="text-sm text-gray-500">{key}</span>
+                        <span className="text-sm text-gray-500">
+                          {Math.max(0.95, (treatments[key] / 5) * 1.5) * 100}%
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div> */}
+                </div>
               )}
             </CardContent>
           </Card>

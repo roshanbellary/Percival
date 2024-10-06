@@ -131,7 +131,7 @@ def edit_fields(filtered_json, file_to_edit, file_to_write):
     3. Updates non-checkbox fields in the PDF by replacing their values based on the provided JSON data.
     4. Manually updates the checkbox fields by iterating over the PDF annotations, setting them to either "checked" (/No) or "unchecked" (/Off).
     5. Saves the edited PDF with all updates applied to the specified output file.
-    
+
     Note: This function modifies both text fields and checkboxes. The checkboxes are updated using the /V, /AS, and /DV keys in the PDF's annotations.
     """
     reader = PdfReader(file_to_edit)
@@ -234,7 +234,7 @@ def store_initial_fields(client, prompt):
         string.ascii_lowercase + string.digits, k=12)) + ".pdf"
 
     parent = str(Path(__file__).parent.parent.parent)
-    file_loc = parent + "/app/public/pdfs/" + file_name
+    file_loc = parent + "/public/pdfs/" + file_name
 
     edit_fields(edit_json, "pdfs/namedform.pdf", file_loc)
 

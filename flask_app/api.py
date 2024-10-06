@@ -1,3 +1,4 @@
+import itertools
 from flask import Flask, request, jsonify
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 import librosa as lb
@@ -197,7 +198,6 @@ def upload_pdf():
         return jsonify({'message': 'Doctor not found'}), 401
 
 
-
 @app.route('/upload-text', methods=['POST'])
 def upload_text():
     first_name = request.form.get('first_name')
@@ -267,7 +267,8 @@ def get_pdf():
         return jsonify({'message': result_text}), 200
     else:
         return jsonify({'message': 'No data uploaded'}), 400
-    
+
+
 @app.route('/anonymize-pdf', methods=['POST'])
 def anonymize_pdf_route():
     # Extract data from the request
@@ -283,6 +284,7 @@ def anonymize_pdf_route():
     except Exception as e:
         return jsonify({'message': f'Error anonymizing PDF: {str(e)}'}), 500
 
+
 def get_field_value(pdd, field_path, default=-2, true_value=1, false_value=0):
     """
     Helper function to retrieve a value from the dictionary safely.
@@ -292,6 +294,26 @@ def get_field_value(pdd, field_path, default=-2, true_value=1, false_value=0):
     try:
         field_value = pdd[field_path]['/V']
         return true_value if field_value == '/No' else false_value
+    except KeyError:
+        return default
+
+
+def get_field_input(pdd, field_path, default=-2):
+    try:
+        field_value = pdd[field_path]['/V']
+        try:
+            return int(field_value)
+        except ValueError:
+            # add as many characters from the prefix, until the first non-digit character
+            return int(''.join(itertools.takewhile(str.isdigit, field_value)))
+    except KeyError:
+        return default
+
+
+def get_field_input_noi(pdd, field_path, default=-2):
+    try:
+        field_value = pdd[field_path]['/V']
+        return field_value
     except KeyError:
         return default
 
@@ -391,10 +413,10 @@ def get_similar_treatments():
         'ks': get_field_value(pdd, 'ks_checkbox'),
         'other_illness': 0,  # Adjust logic if needed
         'symptoms': get_symptoms_count(pdd, 'current_symptoms_1', 'current_symptoms_2'),
-        'cd4count': pdd.get('cd4_cell_count', -2),
-        'cd4percentage': pdd.get('cd4_percentage', -2),
-        'HIVviral': pdd.get('hiv_viral_load', -2),
-        'neutrophil': pdd.get('neutrophil_count', -2),
+        'cd4count': get_field_input(pdd, 'cd4_cell_count', -2),
+        'cd4percentage': get_field_input(pdd, 'cd4_percentage', -2),
+        'HIVviral': get_field_input(pdd, 'hiv_viral_load', -2),
+        'neutrophil': get_field_input(pdd, 'neutrophil_count', -2),
         'cellsmm3': 0,  # Adjust logic if needed
         'otherIllness': 0,  # Adjust logic if needed
         'KARNOFSKY': kIndex,  # Assuming kIndex is predefined
@@ -412,13 +434,60 @@ def get_similar_treatments():
     # convert map to Series
     data = pd.Series(dataMap)
 
-    print(data)
+    # print(data)
 
-    # treatments = find_closest_pipeline(data)
+    # print(data.shape)
 
-    # print(treatments)
+    treatments = find_closest_pipeline(data)
 
-    # return jsonify({'treatments': treatments}), 200
+    treatment_json = treatments.to_json()
+
+    return jsonify({'treatments': treatment_json}), 200
+
+
+@app.route('/get-overview', methods=['GET'])
+def get_overview():
+    id = request.args.get('id')
+    # patient = patients_collection.find_one({'_id': ObjectId(id)})
+    fields = get_all_form_fields(id)
+
+    pData = patients_collection.find_one({'_id': ObjectId(id)})
+
+    if not fields or not pData:
+        return jsonify({'error': 'Patient not found'}), 404
+
+    kIndex = 100
+    kStage = 0
+    for i in range(10, 101, 10):
+        key = "karnofsky_scale_" + str(i)
+        if fields[key]['/V'] == '/No':
+            kIndex = i
+            kStage = (100 - i) // 30 + 1
+            break
+
+    is_postive = False
+
+    if get_field_value(fields, 'hiv_asymptomatic') == 1 or get_field_value(fields, 'hiv_symptomatic') == 1:
+        is_postive = True
+
+    if get_field_value(fields, 'aids_asymptomatic') == 1 or get_field_value(fields, 'aids_symptomatic') == 1:
+        is_postive = True
+
+    details = {
+        'firstName': get_field_input_noi(fields, 'first_name', ''),
+        'lastName': get_field_input_noi(fields, 'last_name', ''),
+        'last4ssn': get_field_input_noi(fields, 'last_4_ssn', 'N/A'),
+        'hivViral': get_field_input_noi(fields, 'hiv_viral_load', 'N/A'),
+        'lastDate': pData['date_updated'],
+        'cd4': get_field_input_noi(fields, 'cd4_cell_count', 'N/A'),
+        'cd4Percent': get_field_input_noi(fields, 'cd4_percentage', 'N/A'),
+        'scale': kIndex,
+        'stage': kStage,
+        'isPositive': is_postive,
+
+    }
+
+    return jsonify(details), 200
 
 
 def get_all_form_fields(patient_id):
@@ -427,9 +496,9 @@ def get_all_form_fields(patient_id):
     patient = patients_collection.find_one({'_id': ObjectId(patient_id)})
     if not patient:
         return None
-    parent = str(Path(__file__).parent.parent.parent)
+    parent = str(Path(__file__).parent.parent)
     pdf_path = patient['pdf']
-    full_path = parent + "/app/public/pdf/" + pdf_path
+    full_path = parent + "/public/pdfs/" + pdf_path
 
     reader = PdfReader(full_path)
     # fields = reader.get_form_text_fields()
