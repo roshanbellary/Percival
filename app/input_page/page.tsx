@@ -5,7 +5,6 @@ import { Label } from "@/components/ui/label";
 import { useState, useEffect, useRef } from "react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Mic, Send, File } from "lucide-react";
-
 import {
   Command,
   CommandEmpty,
@@ -175,7 +174,7 @@ export default function InputPage() {
       let responseMessage = false;
       if (inputType === "audio") {
         console.log("hi");
-        const response = await fetch("http://127.0.0.1:5000/upload-voice/", {
+        const response = await fetch("http://127.0.0.1:5000/upload-voice", {
           method: "POST",
           body: formData,
         });
