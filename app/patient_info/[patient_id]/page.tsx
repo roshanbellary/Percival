@@ -1,6 +1,6 @@
 "use client";
-import { useEffect, useState } from "react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useEffect, useState, useRef } from "react";
+import { Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar";
 import {
   Card,
   CardContent,
@@ -8,6 +8,7 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
+import { Button } from "@/components/ui/button"
 import {
   Activity,
   ChevronDown,
@@ -52,9 +53,17 @@ export function LoadingSpinner() {
 }
 
 export default function Page({ params }: { params: { patient_id: string } }) {
-  const [patientData, setPatientData] = useState<MedicalRecord | null>(null);
-  const [treatments, setTreatments] = useState<{} | null>(null);
+  const [patientData, setPatientData] = useState<MedicalRecord>(); // Initialize state
+  const [treatments, setTreatments] = useState<{}>(null); // Initialize state
+  // Refs for the hidden anchor elements
+  const downloadRef = useRef(null);
+  const anonDownloadRef = useRef(null);
 
+  const handleDownload = (ref) => {
+    if (ref.current) {
+      ref.current.click(); // Programmatically click the hidden anchor
+    }
+  };
   useEffect(() => {
     const fetchPatientData = async () => {
       try {
@@ -173,22 +182,48 @@ export default function Page({ params }: { params: { patient_id: string } }) {
             </CardContent>
           </Card>
 
-          {/* Electronic Health Record */}
-          <Card className="col-span-full bg-white shadow-lg hover:shadow-xl transition-shadow duration-300">
-            <CardHeader>
-              <CardTitle className="text-2xl text-indigo-800">Electronic Health Record</CardTitle>
-              <CardDescription className="text-indigo-600">Automated APLA Diagnosis Form</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <iframe
-                src={`/${patientData.FilePath}`}
-                width="100%"
-                height="800"
-                title="PDF Preview"
-                className="border border-indigo-200 rounded-lg"
-              />
-            </CardContent>
-          </Card>
+          <CardContent>
+            <iframe
+              src={`/pdfs/${patientData.FilePath}`}
+              width="100%"
+              height="800"
+              title="PDF Preview"
+              className="border border-gray-300"
+            />
+          </CardContent>
+          <CardContent className="flex flex-col items-center"> {/* Center items vertically */}
+            <Button
+              onClick={() => handleDownload(downloadRef)} // Call the handler on button click
+              className="mb-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" // Added margin-bottom for spacing
+            >
+              Download PDF
+            </Button>
+            <a
+              ref={downloadRef} // Attach ref to the hidden anchor
+              href={`/pdfs/${patientData.FilePath}`} // Link to the PDF
+              download // This attribute triggers the download
+              style={{ display: 'none' }} // Hide the anchor element
+            >
+              Download PDF
+            </a>
+
+            {/* Button for downloading the anonymized PDF */}
+            <Button
+              onClick={() => handleDownload(anonDownloadRef)} // Call the handler on button click
+              className="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" // Margin-top for spacing
+            >
+              Download Anonymized PDF
+            </Button>
+            <a
+              ref={anonDownloadRef} // Attach ref to the hidden anchor
+              href={`/anonpdfs/${patientData.FilePath}`} // Link to the anonymized PDF
+              download // This attribute triggers the download
+              style={{ display: 'none' }} // Hide the anchor element
+            >
+              Download Anonymized PDF
+            </a>
+          </CardContent>
+      </Card>
 
           {/* Similar Patients */}
           <Card className="col-span-full bg-white shadow-lg hover:shadow-xl transition-shadow duration-300">
