@@ -94,7 +94,7 @@ def send_transcript(file):
 
     
 @app.route('/upload-voice', methods=['POST'])
-def get_transcript():
+def upload_transcript():
     """Handle audio file uploads and return the transcription."""
     # Extract the form data fields
     first_name = request.form.get('first_name')
@@ -102,33 +102,34 @@ def get_transcript():
     dob = request.form.get('dob')
     ssn = request.form.get('ssn')
     language = request.form.get('language')
-    # Extract the audio file
+    doctor_email = request.form.get('doctor_email')  # Added to get doctor ID
     audio_file = request.files.get('audio')
-    
     if not audio_file:
         return {'message': 'No audio file provided'}, 400
-
-    # Create a temporary file to save the audio Blob
     with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
         tmp_file.write(audio_file.read())
         tmp_file_path = tmp_file.name
-
-    # Convert the audio file to WAV format using pydub
-    audio = AudioSegment.from_file(tmp_file_path)  # Automatically detects format
+    audio = AudioSegment.from_file(tmp_file_path)  
     wav_path = 'uploaded_recording.wav'
-    audio.export(wav_path, format='wav')  # Export as .wav
-
-    # Transcribe the WAV file using Whisper
+    audio.export(wav_path, format='wav')  
     transcription = send_transcript(wav_path)
     print(transcription)
-    # Clean up: remove the temporary WAV file
     os.remove(wav_path)
     os.remove(tmp_file_path)
-
-    # Combine transcription with user information
+    doctor = doctors_collection.find_one({'email': doctor_email})
+    if not doctor:
+        return {'message': 'Doctor not found'}, 404
+    doctor_id = doctor['_id']
     response_text = f"First Name: {first_name}, Last Name: {last_name}, DOB: {dob}, SSN: {ssn}, Language: {language}, Transcription: {transcription}"
-    global result_text
-    result_text = response_text
+    patients_collection.insert_one({
+        'first_name': first_name,
+        'last_name': last_name,
+        'dob': dob,
+        'ssn': ssn,
+        'doctor_id': doctor_id,
+        'file_path': "",  # Use the appropriate file path
+        'text_description': response_text
+    })
     return jsonify({'transcription': response_text}), 200
 
 @app.route('/upload-pdf', methods=['POST'])
@@ -139,6 +140,7 @@ def upload_pdf():
     ssn = request.form.get('ssn')
     language = request.form.get('language')
     pdf_file = request.form.get('pdf')
+    doctor_email = request.form.get('doctor_email')
     if not pdf_file:
         return jsonify({'message': 'No pdf file provided'}), 400
     reader = PdfReader(pdf_file)
@@ -148,7 +150,19 @@ def upload_pdf():
     response_text = f"First Name: {first_name}, Last Name: {last_name}, DOB: {dob}, SSN: {ssn}, Language: {language}, Transcription: {pdf_text}"
     global result_text
     result_text = response_text
-    print(response_text)
+    doctor = doctors_collection.find_one({'email': doctor_email})
+    if (not doctor):
+        return jsonify({'message': "No Doctor Found"}), 404
+    doctor_id = doctor['_id']
+    patients_collection.insert_one({
+        'first_name': first_name,
+        'last_name': last_name,
+        'dob': dob,
+        'ssn': ssn,
+        'doctor_id': doctor_id,
+        'file_path': "",
+        'text_description': response_text
+    })
     return jsonify({'transcription': response_text}), 200
 
 @app.route('/upload-text', methods=['POST'])
@@ -159,12 +173,25 @@ def upload_text():
     ssn = request.form.get('ssn')
     text = request.form.get('message')
     language = request.form.get('language')
+    doctor_email = request.form.get('doctor_email')
     result = {"first_name": first_name, "last_name": last_name,
                        "dob": dob, "ssn": ssn, "message": text, "language": language}
     response_text = f"First Name: {first_name}, Last Name: {last_name}, DOB: {dob}, SSN: {ssn}, Language: {language}, Transcription: {text}"
     global result_text
     result_text = response_text
-    print(response_text)
+    doctor = doctors_collection.find_one({'email': doctor_email})
+    if (not doctor):
+        return jsonify({'message': "No Doctor Found"}), 404
+    doctor_id = doctor['_id']
+    patients_collection.insert_one({
+        'first_name': first_name,
+        'last_name': last_name,
+        'dob': dob,
+        'ssn': ssn,
+        'doctor_id': doctor_id,
+        'file_path': "",
+        'text_description': response_text
+    })
     return jsonify({'transcription': response_text}), 200
 
 # def add_patient():
