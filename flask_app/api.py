@@ -10,19 +10,58 @@ import os
 import whisper
 import json
 import tempfile
-
+from pymongo import MongoClient
+import gridfs
+import os
+from dotenv import load_dotenv
+# MongoDB connection setup
+load_dotenv()
+mongo_uri = os.getenv("MONGODB_URI")
+client = MongoClient(mongo_uri)  # Change to your MongoDB URI
+db = client["percival"]  # Replace with your database name
+patients_collection = db["patients"]  # Define patients collection
+doctors_collection = db["doctors"]  # Define doctors collection
+fs = gridfs.GridFS(db)
 app = Flask(__name__)
 CORS(app, origins=["*"])
+
+
+#getting all patients for a doctor
+@app.route('/get-patients', methods=['GET'])
+def get_patients():
+    doctor_email = request.args.get('email')
+    
+    if not doctor_email:
+        return jsonify({'message': 'Doctor email not provided'}), 400
+    
+    try:
+        doctor = doctors_collection.find_one({'email': doctor_email})
+        
+        if not doctor:
+            return jsonify({'message': 'Doctor not found'}), 404
+        patients = list(patients_collection.find({'doctor_id': doctor['_id']}))
+        
+        if not patients:
+            return jsonify({'message': 'No patients found for this doctor'}), 404
+        patient_list = []
+        for patient in patients:
+            patient['_id'] = str(patient['_id'])
+            patient_list.append(patient)
+
+        return jsonify({'patients': patient_list}), 200
+    except Exception as e:
+        return jsonify({'message': f'An error occurred: {str(e)}'}), 500
 
 # importing whisper model
 model = whisper.load_model("base")
 
-
+result_text = ""
 def send_transcript(file):
     result = model.transcribe(file)
     transcription = result["text"]
     return transcription
 
+    
 @app.route('/upload-voice', methods=['POST'])
 def get_transcript():
     """Handle audio file uploads and return the transcription."""
@@ -57,7 +96,8 @@ def get_transcript():
 
     # Combine transcription with user information
     response_text = f"First Name: {first_name}, Last Name: {last_name}, DOB: {dob}, SSN: {ssn}, Language: {language}, Transcription: {transcription}"
-    
+    global result_text
+    result_text = response_text
     return jsonify({'transcription': response_text}), 200
 
 @app.route('/upload-pdf', methods=['POST'])
@@ -75,6 +115,8 @@ def upload_pdf():
     for page in reader.pages:
         pdf_text += page.extract_text()
     response_text = f"First Name: {first_name}, Last Name: {last_name}, DOB: {dob}, SSN: {ssn}, Language: {language}, Transcription: {pdf_text}"
+    global result_text
+    result_text = response_text
     print(response_text)
     return jsonify({'transcription': response_text}), 200
 
@@ -89,9 +131,25 @@ def upload_text():
     result = {"first_name": first_name, "last_name": last_name,
                        "dob": dob, "ssn": ssn, "message": text, "language": language}
     response_text = f"First Name: {first_name}, Last Name: {last_name}, DOB: {dob}, SSN: {ssn}, Language: {language}, Transcription: {text}"
+    global result_text
+    result_text = response_text
     print(response_text)
     return jsonify({'transcription': response_text}), 200
 
+def add_patient():
+    global result_text
+    if len(result_text) > 0:
+        # do pdf making code
+        # create a patient entity based upon given pdf
+    
+
+
+@app.route('/get-pdf', methods=['GET'])
+def get_pdf():
+    if (len(result_text) > 0):
+        return jsonify({'message': result_text}), 200
+    else:
+        return jsonify({'message': 'No data uploaded'}), 400
 def translate_text(text, target_language):
     """Translate text to the target language."""
     model_name = f'Helsinki-NLP/opus-mt-en-{target_language}'
