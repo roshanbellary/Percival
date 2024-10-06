@@ -151,9 +151,10 @@ def upload_transcript():
         "_drEmailID": drEmailID
     }
 
-    status = create_patient(config, drEmailID)
-    if status:
-        return jsonify({'message': 'Patient created successfully'}), 200
+    patient_id = create_patient(config, drEmailID)
+    if patient_id:
+        return jsonify({'message': 'Patient created successfully',
+                        'patientId': str(patient_id)}), 200
     else:
         return jsonify({'message': 'Doctor not found'}), 401
 
@@ -189,9 +190,10 @@ def upload_pdf():
     }
     # return jsonify({'transcription': response_text}), 200
 
-    status = create_patient(config, drEmailID)
-    if status:
-        return jsonify({'message': 'Patient created successfully'}), 200
+    patient_id = create_patient(config, drEmailID)
+    if patient_id:
+        return jsonify({'message': 'Patient created successfully',
+                        'patientId': str(patient_id)}), 200
     else:
         return jsonify({'message': 'Doctor not found'}), 401
 
@@ -220,9 +222,10 @@ def upload_text():
         "_drEmailID": drEmailID
     }
 
-    status = create_patient(config, drEmailID)
-    if status:
-        return jsonify({'message': 'Patient created successfully'}), 200
+    patient_id = create_patient(config, drEmailID)
+    if patient_id:
+        return jsonify({'message': 'Patient created successfully',
+                        'patientId': str(patient_id)}), 200
     else:
         return jsonify({'message': 'Doctor not found'}), 401
 
@@ -254,9 +257,9 @@ def create_patient(config, doctor_id):
         "instruction": config["PATIENT_DATA"],
     }
     print(patient_upload_data)
-    patients_collection.insert_one(patient_upload_data)
+    result = patients_collection.insert_one(patient_upload_data)
 
-    return True
+    return result.inserted_id
 
 
 @app.route('/get-pdf', methods=['GET'])

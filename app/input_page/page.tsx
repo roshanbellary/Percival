@@ -1,4 +1,5 @@
 "use client";
+import { Loader2 } from "lucide-react"
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -21,6 +22,7 @@ import {
 
 import { Check, ChevronsUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useRouter } from "next/navigation";
 
 const frameworks = [
   { value: "english", label: "English" },
@@ -66,6 +68,7 @@ const frameworks = [
 ];
 
 export default function InputPage() {
+  const router = useRouter()
   const [inputType, setInputType] = useState("text"); // To toggle between 'text', 'audio', and 'pdf'
   const [message, setMessage] = useState("");
   const [firstName, setFirstName] = useState("");
@@ -74,6 +77,7 @@ export default function InputPage() {
   const [ssn, setSsn] = useState("");
   const [language, setLanguage] = useState("english");
   const [languageComboboxOpen, setLanguageComboboxOpen] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [audioURL, setAudioURL] = useState(null);
   const [audioBlob, setAudioBlob] = useState(null);
@@ -155,7 +159,9 @@ export default function InputPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+
     const formData = new FormData();
+    setSubmitting(true);
     formData.append("first_name", firstName);
     formData.append("last_name", lastName);
     formData.append("dob", dob);
@@ -174,29 +180,32 @@ export default function InputPage() {
 
     try {
       let responseMessage = false;
+      let response;
       if (inputType === "audio") {
         console.log("hi");
-        const response = await fetch("http://127.0.0.1:5000/upload-voice", {
+        response = await fetch("http://127.0.0.1:8000/upload-voice", {
           method: "POST",
           body: formData,
         });
         responseMessage = response.ok;
       } else if (inputType === "text") {
-        const response = await fetch("http://127.0.0.1:5000/upload-text", {
+        response = await fetch("http://127.0.0.1:8000/upload-text", {
           method: "POST",
           body: formData,
         });
         console.log(response);
         responseMessage = response.ok;
       } else {
-        const response = await fetch("http://127.0.0.1:5000/upload-pdf", {
+        response = await fetch("http://127.0.0.1:8000/upload-pdf", {
           method: "POST",
           body: formData,
         });
         responseMessage = response.ok;
       }
       if (responseMessage) {
-        alert("Form submitted successfully!");
+        // alert("Form submitted successfully!");
+
+        const { patientId } = await response.json()
         // Reset form
         setFirstName("");
         setLastName("");
@@ -206,11 +215,17 @@ export default function InputPage() {
         setAudioURL(null);
         setAudioBlob(null);
         setPdfFile(null);
+        setSubmitting(false);
+
+        router.push(`/patient_info/${patientId}`);
+
       } else {
+        setSubmitting(false);
         alert("Failed to submit form.");
       }
     } catch (error) {
       console.error("Error submitting form:", error);
+      setSubmitting(false);
       alert("An error occurred while submitting the form.");
     }
   };
@@ -440,12 +455,22 @@ export default function InputPage() {
             </div>
           )}
 
-          <Button
-            type="submit"
-            className="w-full py-6 text-lg flex items-center justify-center"
-          >
-            <Send className="mr-2 h-5 w-5" /> Submit
-          </Button>
+          {submitting && (
+            <Button disabled
+              className="w-full py-6 text-lg flex items-center justify-center"
+            >
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Processing may take a moment
+            </Button>
+          )}
+          {!submitting && (
+            <Button
+              type="submit"
+              className="w-full py-6 text-lg flex items-center justify-center"
+            >
+              <Send className="mr-2 h-5 w-5" /> Submit
+            </Button>
+          )}
         </form>
       </div>
     </div>

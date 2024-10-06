@@ -46,7 +46,9 @@ def anonpdf(input_pdf, aiclient):
      as possible, just remove sensitive information related to the patient or other individuals.
 
      The JSON within <INPUT> contains the field names and their values in JSON. Replace the values of the fields with PHI with "REDACTED" for the output. 
-     Output as strictly JSON, no qoutation marks, just the JSON as a string, and only output the fields that have been redacted.
+     Output as strictly JSON, no quotation marks, just the JSON as a string, and only output the fields that have been redacted.
+
+     ************MAKE SURE IT IS VALID JSON WITHOUT ANY ADDITIONAL CHARACTERS***************
 
      <INPUT>
      <FIELDS>
