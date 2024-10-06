@@ -51,7 +51,7 @@ export default function PatientHistory() {
           setIsLoading(true);
           //const prevLink = `https://d1-tutorial.cows.workers.dev/api/doctor/${email}/get-files`;
           const response = await fetch(
-            `http://127.0.0.1:8000/get-patients?email=${email}`
+            `http://127.0.0.1:5000/get-patients?email=${email}`
           );
           const data = await response.json();
           console.log(data);

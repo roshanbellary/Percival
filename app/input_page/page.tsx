@@ -176,20 +176,20 @@ export default function InputPage() {
       let responseMessage = false;
       if (inputType === "audio") {
         console.log("hi");
-        const response = await fetch("http://127.0.0.1:8000/upload-voice", {
+        const response = await fetch("http://127.0.0.1:5000/upload-voice", {
           method: "POST",
           body: formData,
         });
         responseMessage = response.ok;
       } else if (inputType === "text") {
-        const response = await fetch("http://127.0.0.1:8000/upload-text", {
+        const response = await fetch("http://127.0.0.1:5000/upload-text", {
           method: "POST",
           body: formData,
         });
         console.log(response);
         responseMessage = response.ok;
       } else {
-        const response = await fetch("http://127.0.0.1:8000/upload-pdf", {
+        const response = await fetch("http://127.0.0.1:5000/upload-pdf", {
           method: "POST",
           body: formData,
         });
