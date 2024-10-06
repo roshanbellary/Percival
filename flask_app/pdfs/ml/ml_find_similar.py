@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 
 
-def find_cluster(row: pd.Series, model="clustering.pkl"):
+def find_cluster(row: pd.Series, model="pdfs/ml/clustering.pkl"):
     # Load the clustering model
     kmeans = pickle.load(open(model, 'rb'))
 
@@ -14,7 +14,7 @@ def find_cluster(row: pd.Series, model="clustering.pkl"):
 
 
 def get_data_of_same_cluster(cluster_num):
-    df = pd.read_csv('main_synth_data_cluster.csv')
+    df = pd.read_csv('pdfs/ml/main_synth_data_cluster.csv')
     return df[df['cluster'] == cluster_num]
 
 
@@ -61,7 +61,7 @@ def list_treatments(cloest_df):
 
 
 def find_closest_pipeline(row: pd.Series):
-    df = pd.read_csv('main_synth_data.csv')
+    df = pd.read_csv('pdfs/ml/main_synth_data.csv')
 
     cluster = find_cluster(row)
     data_cluster = get_data_of_same_cluster(cluster)
@@ -86,8 +86,8 @@ def find_closest_pipeline(row: pd.Series):
     return treatments
 
 
-df = pd.read_csv('main_synth_data.csv')
-row10 = df.iloc[10]
-row10 = row10[:-41]
+# df = pd.read_csv('main_synth_data.csv')
+# row10 = df.iloc[10]
+# row10 = row10[:-41]
 
-print(find_closest_pipeline(row10))
+# print(find_closest_pipeline(row10))

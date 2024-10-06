@@ -16,8 +16,10 @@ import os
 from bson.objectid import ObjectId
 from dotenv import load_dotenv
 from datetime import datetime
+from pathlib import Path
 
 from pdfs.full_pdf_pipeline import create_anon_pdf
+from pdfs.ml.ml_find_similar import find_closest_pipeline
 # MongoDB connection setup
 load_dotenv()
 mongo_uri = os.getenv("MONGODB_URI")
@@ -74,8 +76,8 @@ def get_patients():
 
     try:
         doctor = doctors_collection.find_one({'email': doctor_email})
-        doctorId = str(doctor['_id'])
-        patients = list(patients_collection.find({'doctor_id': doctorId}))
+        # doctorId = str(doctor['_id'])
+        patients = list(patients_collection.find({'doctor_id': doctor_email}))
         if not patients:
             return jsonify({'message': 'No patients found for this doctor'}), 404
         medical_records = []
@@ -261,6 +263,162 @@ def get_pdf():
         return jsonify({'message': result_text}), 200
     else:
         return jsonify({'message': 'No data uploaded'}), 400
+
+
+def get_field_value(pdd, field_path, default=-2, true_value=1, false_value=0):
+    """
+    Helper function to retrieve a value from the dictionary safely.
+    If the field does not exist, return the default value.
+    If it does exist, return true_value or false_value depending on the field content.
+    """
+    try:
+        field_value = pdd[field_path]['/V']
+        return true_value if field_value == '/No' else false_value
+    except KeyError:
+        return default
+
+
+def get_days_old(pdd, field_path, default=-2):
+    """
+    Helper function to calculate the number of days between today and a given date.
+    Returns the default value if the field is not found or invalid.
+    """
+    try:
+        date_value = pd.to_datetime(pdd[field_path]['/V'])
+        return (datetime.today() - date_value).days
+    except (KeyError, ValueError):
+        return default
+
+
+def get_symptoms_count(pdd, symptom_field_1, symptom_field_2, default=-2):
+    """
+    Helper function to count symptoms if the fields exist.
+    """
+    try:
+        return (1 if len(pdd.get(symptom_field_1, '')) > 0 else 0) + \
+               (1 if len(pdd.get(symptom_field_2, '')) > 0 else 0)
+    except KeyError:
+        return default
+
+
+@app.route('/get-patient-treatments', methods=['GET'])
+def get_similar_treatments():
+    patient_id = request.args.get('patient_id')
+    patient = patients_collection.find_one({'_id': ObjectId(patient_id)})
+    if not patient:
+        return jsonify({'message': 'Patient not found'}), 404
+
+    patient_data = get_all_form_fields(patient_id)
+    pdd = patient_data
+    # for each 10 from 10 to 100 inclusive...
+    kIndex = 100
+    kStage = 1
+    for i in range(10, 101, 10):
+        key = "karnofsky_scale_" + str(i)
+        if pdd[key]['/V'] == '/No':
+            kIndex = i
+            kStage = (100 - i) // 30 + 1
+            break
+
+    # dataMap = {
+    #     'id': -1,
+    #     'daysOld': (datetime.today() - pd.to_datetime(pdd['date_of_birth']['/V'])).days,
+    #     'diagnosisDays': (datetime.today() - pd.to_datetime(pdd['diagnosis_date']['/V'])).days,
+    #     'hivA': 1 if pdd['hiv_asymptomatic']['/V'] == '/No' else 0,
+    #     'hivS': 1 if pdd['hiv_symptomatic']['/V'] == '/No' else 0,
+    #     'aidsA': 1 if pdd['aids_asymptomatic']['/V'] == '/No' else 0,
+    #     'aidsS': 1 if pdd['aids_symptomatic']['/V'] == '/No' else 0,
+    #     'fever': 1 if pdd['fevers_checkbox']['/V'] == '/No' else 0,
+    #     'fatigue': 1 if pdd['fatigue_checkbox']['/V'] == '/No' else 0,
+    #     'diarrhea': 1 if pdd['diarrhea_checkbox']['/V'] == '/No' else 0,
+    #     'other_symptoms': 0,
+    #     #  1 if pdd['other_symptoms_checkbox']['/V'] == '/No' else 0,
+    #     'cd4': 1 if pdd['cd4<200/14_checkbox']['/V'] == '/No' else 0,
+    #     'pcp': 1 if pdd['pcp_checkbox']['/V'] == '/No' else 0,
+    #     'ks': 1 if pdd['ks_checkbox']['/V'] == '/No' else 0,
+    #     'other_illness': 0,
+    #     # 1 if pdd['other_opportunistics_infections_checkbox']['/V'] == '/No' else 0,
+    #     'symptoms': (1 if len(pdd['current_symptoms_1']) > 0 else 0) +
+    #                 (1 if len(pdd['current_symptoms_2']) > 0 else 0),
+    #     'cd4count': pdd['cd4_cell_count'],
+    #     'cd4percentage': pdd['cd4_percentage'],
+    #     'HIVviral': pdd['hiv_viral_load'],
+    #     'neutrophil': pdd['neutrophil_count'],
+    #     'cellsmm3': 0,
+    #     'otherIllness': 0,
+    #     'KARNOFSKY': kIndex,
+    #     'KARNOFSKYSTAGE': kStage,
+    #     'Nursing': 1 if pdd['skilled_nursing_care_checkbox_yes']['/V'] == '/No' else 0,
+    #     'Dental': 1 if pdd['dental_checkbox_yes']['/V'] == '/No' else 0,
+    #     'tbScreen': 1 if pdd['tuberculosis_checkbox_yes']['/V'] == '/No' else 0,
+    #     'tbDiagnosis': 1 if (pdd['tb_skin_text_checkbox_positive']['/V'] == '/No' or pdd['tb_chest_xray_checkbox_positive']['/V'] == '/No') else 0,
+    #     'tbPrevent': 1 if pdd['receiving_preventative_tb_treatment_checkbox']['/V'] == '/No' else 0,
+    #     'tbActive': 1 if pdd['receiving_active_tb_treatment_checkbox']['/V'] == '/No' else 0,
+    #     'tbCompliance': 1 if pdd['noncompliant_with_recommended_tb_treatment']['/V'] == '/No' else 0,
+    # }
+    dataMap = {
+        'id': -1,
+        'daysOld': get_days_old(pdd, 'date_of_birth'),
+        'diagnosisDays': get_days_old(pdd, 'diagnosis_date'),
+        'hivA': get_field_value(pdd, 'hiv_asymptomatic'),
+        'hivS': get_field_value(pdd, 'hiv_symptomatic'),
+        'aidsA': get_field_value(pdd, 'aids_asymptomatic'),
+        'aidsS': get_field_value(pdd, 'aids_symptomatic'),
+        'fever': get_field_value(pdd, 'fevers_checkbox'),
+        'fatigue': get_field_value(pdd, 'fatigue_checkbox'),
+        'diarrhea': get_field_value(pdd, 'diarrhea_checkbox'),
+        'other_symptoms': 0,  # Adjust logic if needed
+        'cd4': get_field_value(pdd, 'cd4<200/14_checkbox'),
+        'pcp': get_field_value(pdd, 'pcp_checkbox'),
+        'ks': get_field_value(pdd, 'ks_checkbox'),
+        'other_illness': 0,  # Adjust logic if needed
+        'symptoms': get_symptoms_count(pdd, 'current_symptoms_1', 'current_symptoms_2'),
+        'cd4count': pdd.get('cd4_cell_count', -2),
+        'cd4percentage': pdd.get('cd4_percentage', -2),
+        'HIVviral': pdd.get('hiv_viral_load', -2),
+        'neutrophil': pdd.get('neutrophil_count', -2),
+        'cellsmm3': 0,  # Adjust logic if needed
+        'otherIllness': 0,  # Adjust logic if needed
+        'KARNOFSKY': kIndex,  # Assuming kIndex is predefined
+        'KARNOFSKYSTAGE': kStage,  # Assuming kStage is predefined
+        'Nursing': get_field_value(pdd, 'skilled_nursing_care_checkbox_yes'),
+        'Dental': get_field_value(pdd, 'dental_checkbox_yes'),
+        'tbScreen': get_field_value(pdd, 'tuberculosis_checkbox_yes'),
+        'tbDiagnosis': 1 if (get_field_value(pdd, 'tb_skin_text_checkbox_positive') == 1 or
+                             get_field_value(pdd, 'tb_chest_xray_checkbox_positive') == 1) else 0,
+        'tbPrevent': get_field_value(pdd, 'receiving_preventative_tb_treatment_checkbox'),
+        'tbActive': get_field_value(pdd, 'receiving_active_tb_treatment_checkbox'),
+        'tbCompliance': get_field_value(pdd, 'noncompliant_with_recommended_tb_treatment'),
+    }
+
+    # convert map to Series
+    data = pd.Series(dataMap)
+
+    print(data)
+
+    # treatments = find_closest_pipeline(data)
+
+    # print(treatments)
+
+    # return jsonify({'treatments': treatments}), 200
+
+
+def get_all_form_fields(patient_id):
+    # load file
+
+    patient = patients_collection.find_one({'_id': ObjectId(patient_id)})
+    if not patient:
+        return None
+    parent = str(Path(__file__).parent.parent)
+    pdf_path = patient['pdf']
+    full_path = parent + "/app/public/pdfs/" + pdf_path
+
+    reader = PdfReader(full_path)
+    # fields = reader.get_form_text_fields()
+    page = reader.pages[0]
+    fields = reader.get_fields()
+
+    return fields
 
 
 def translate_text(text, target_language):

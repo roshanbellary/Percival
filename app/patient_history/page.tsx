@@ -14,6 +14,23 @@ interface MedicalRecord {
   LastName: string;
 }
 
+export const LoadingSpinner = ({ className }) => {
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={cn("animate-spin", className)}
+  >
+    <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+  </svg>;
+};
+
 export default function PatientHistory() {
   const [email, setEmail] = useState("");
   const [medicalRecords, setMedicalRecords] = useState<MedicalRecord[]>([]);
@@ -57,7 +74,6 @@ export default function PatientHistory() {
       <h1 className="text-3xl font-bold mb-6 text-center text-primary">
         Your Medical History
       </h1>
-
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {[...Array(4)].map((_, index) => (
