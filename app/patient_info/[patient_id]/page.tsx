@@ -1,210 +1,162 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { FileText, Search, UserPlus } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
-import {
-  Activity,
-  ChevronDown,
-  FileText,
-  Heart,
-  Home,
-  Menu,
-  User,
-  Users,
-} from "lucide-react";
+
 interface MedicalRecord {
   PatientID: number;
   FilePath: string;
   FirstName: string;
-  DOB: string;
   LastName: string;
 }
 
-export function LoadingSpinner() {
-  return (
-    <div role="status">
-      <svg
-        aria-hidden="true"
-        class="w-8 h-8 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600"
-        viewBox="0 0 100 101"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <path
-          d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
-          fill="currentColor"
-        />
-        <path
-          d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
-          fill="currentFill"
-        />
-      </svg>
-      <span class="sr-only">Loading...</span>
-    </div>
-  );
-}
+export const LoadingSpinner = ({ className }: { className?: string }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={`animate-spin ${className}`}
+  >
+    <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+  </svg>
+);
 
-export default function Page({ params }: { params: { patient_id: string } }) {
-  const [patientData, setPatientData] = useState<MedicalRecord>(); // Initialize state
-  const [treatments, setTreatments] = useState<{}>(null); // Initialize state
+export default function PatientHistory() {
+  const [email, setEmail] = useState("");
+  const [medicalRecords, setMedicalRecords] = useState<MedicalRecord[]>([]);
+  const [filteredMedicalRecords, setFilteredMedicalRecords] = useState<MedicalRecord[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
   useEffect(() => {
-    const fetchPatientData = async () => {
-      try {
-        const patientResponse = await fetch(
-          `http://127.0.0.1:8000/get-patient?id=${params.patient_id}`
-        );
-        const jsonData = await patientResponse.json();
-        const patient = jsonData["patient"];
-        console.log(patient)
-        console.log("hi")
-        // Set the patient data to state
-        setPatientData(patient);
+    const userEmail = localStorage.getItem("email");
+    if (userEmail) {
+      setEmail(userEmail);
+    }
+  }, []);
 
-        const treatments = await fetch(
-          `http://127.0.0.1:8000/get-patient-treatments?patient_id=${params.patient_id}`
-        );
-
-        const treatmentsData = await treatments.json();
-        console.log(treatmentsData);
-        setTreatments(treatmentsData);
-
-        // Log the file path
-        if (patient && patient.FilePath) {
-          console.log("File Path:", patient.FilePath);
+  useEffect(() => {
+    const fetchMedicalRecords = async () => {
+      if (email) {
+        try {
+          setIsLoading(true);
+          const response = await fetch(
+            `http://127.0.0.1:8000/get-patients?email=${email}`
+          );
+          const data = await response.json();
+          console.log(data);
+          setMedicalRecords(data["patients"]);
+          setFilteredMedicalRecords(data["patients"]);
+        } catch (error) {
+          console.error("Failed to fetch medical records:", error);
+        } finally {
+          setIsLoading(false);
         }
-      } catch (error) {
-        console.error("Error fetching patient data:", error);
       }
     };
+    fetchMedicalRecords();
+  }, [email]);
 
-    fetchPatientData(); // Call the fetch function
-  }, [params.patient_id]); // Dependency array to refetch if patient_id changes
+  const getColorForPatient = (index: number) => {
+    const colors = ['bg-blue-500', 'bg-green-500', 'bg-purple-500', 'bg-pink-500', 'bg-yellow-500'];
+    return colors[index % colors.length];
+  };
 
-  // If patientData is not loaded yet, return a loading state or placeholder
-  if (!patientData) {
-    return <div>Loading...</div>;
-  }
-
-  const patientInitials = (
-    patientData.FirstName.charAt(0) + patientData.LastName.charAt(0)
-  ).toUpperCase();
-  const patientName = [patientData.FirstName, patientData.LastName].join(" ");
-  console.log(patientData);
   return (
-    <main className="flex-1 overflow-y-auto p-6 max-w-[1000px] mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-100 to-white p-6">
+      <div className="container mx-auto max-w-4xl bg-white rounded-xl shadow-lg p-8">
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-3xl font-bold text-indigo-800">Your Patients</h1>
+          <Link href={`/input_page/`} passHref>
+            <Button className="bg-indigo-600 hover:bg-indigo-700 text-white">
+              <UserPlus className="mr-2 h-4 w-4" /> Add New Patient
+            </Button>
+          </Link>
+        </div>
 
+        <div className="relative mb-6">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-indigo-400" />
+          <Input
+            className="pl-10 pr-4 py-2 w-full border-2 border-indigo-200 focus:border-indigo-500 rounded-full"
+            placeholder="Search for patient"
+            onChange={(e) => {
+              const searchValue = e.target.value;
+              if (searchValue === "") {
+                setFilteredMedicalRecords(medicalRecords);
+              } else {
+                const filtered = medicalRecords.filter((record) => {
+                  return record.FirstName.toLowerCase().includes(searchValue.toLowerCase()) || record.LastName.toLowerCase().includes(searchValue.toLowerCase());
+                });
+                setFilteredMedicalRecords(filtered);
+              }
+            }}
+          />
+        </div>
 
-      <h1 className="text-4xl font-bold text-primary pb-4">
-        Patient Details
-      </h1>
-
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {/* Patient Summary */}
-        <Card className="col-span-full">
-          <CardHeader className="flex flex-row items-center space-x-4">
-            <Avatar className="h-16 w-16">
-              <AvatarImage src="/placeholder-patient.jpg" alt="Patient" />
-              <AvatarFallback>{patientInitials}</AvatarFallback>
-            </Avatar>
-            <div>
-              <CardTitle>{patientName}</CardTitle>
-              {/* <CardDescription>Patient ID: 12345 • Male, 45 years old</CardDescription> */}
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
-              <div className="flex items-center space-x-2">
-                <User className="h-4 w-4 text-gray-500" />
-                <span className="text-sm text-gray-500">
-                  DOB: {new Date(patientData.DOB).toLocaleDateString()}
-                </span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Activity className="h-4 w-4 text-gray-500" />
-                <span className="text-sm text-gray-500"></span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Heart className="h-4 w-4 text-gray-500" />
-                <span className="text-sm text-gray-500"></span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <FileText className="h-4 w-4 text-gray-500" />
-                <span className="text-sm text-gray-500">Last Diagnosis: -</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        {/* Vital Statistics */}
-        <Card>
-          <CardHeader>
-            <CardTitle>HIV / AIDS Diagnosis</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">N/A</div>
-            <p className="text-sm text-gray-500">Last measured: </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>CD4 Count</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">N/A</div>
-            <p className="text-sm text-gray-500">Last measured: </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>HIV Viral Load</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">N/A</div>
-            <p className="text-sm text-gray-500">Last measured: </p>
-          </CardContent>
-        </Card>
-
-        {/* Recent Medical History */}
-        <Card className="col-span-full">
-          <CardHeader>
-            <CardTitle>Electronic Health Record</CardTitle>
-            <CardDescription>Automated APLA Diagnosis Form </CardDescription>
-          </CardHeader>
-
-          <CardContent>
-            <iframe
-              src={`/pdfs/${patientData.FilePath}`}
-              width="100%"
-              height="800"
-              title="PDF Preview"
-              className="border border-gray-300"
-            />
-          </CardContent>
-        </Card>
-
-        <Card className="col-span-full">
-          <CardHeader>
-            <CardTitle>Similar Patients</CardTitle>
-            <CardDescription>
-              Treatments Recommended to Similar Patient Profiles
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {!treatments ? (
-              <div style={{ display: "flex", justifyContent: "center" }}>
-                <LoadingSpinner />
-              </div>
-            ) : (
-              <div></div>
-            )}
-          </CardContent>
-        </Card>
+        {isLoading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {[...Array(4)].map((_, index) => (
+              <Card key={index} className="w-full">
+                <CardHeader>
+                  <Skeleton className="h-4 w-3/4" />
+                </CardHeader>
+                <CardContent>
+                  <Skeleton className="h-32 w-full" />
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : filteredMedicalRecords.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {filteredMedicalRecords.map((record, index) => (
+              <Link
+                key={index}
+                href={`/patient_info/${record.PatientID}/`}
+                passHref
+              >
+                <Card className="w-full hover:shadow-md transition-shadow duration-200 overflow-hidden border-l-4 cursor-pointer" style={{ borderLeftColor: getColorForPatient(index) }}>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-lg font-semibold text-gray-800 flex items-center">
+                      <FileText className="mr-2" size={18} />
+                      {`${record.FirstName} ${record.LastName}`}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex items-center space-x-4">
+                      <Avatar className={`h-12 w-12 ${getColorForPatient(index)} text-white`}>
+                        <AvatarFallback className={getColorForPatient(index)}>{record.FirstName[0]}{record.LastName[0]}</AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1">
+                        <p className="text-sm text-gray-500 truncate text-ellipsis">ID: {record.PatientID.toString().slice(0, 15)}...</p>
+                      </div>
+                      <div className="flex-grow"></div>
+                      <Button variant="outline" size="sm" className="text-indigo-600 border-indigo-300 hover:bg-indigo-50">
+                        View Details
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
+            ))}
+          </div>
+        ) : (
+          <Card className="w-full p-6 text-center">
+            <p className="text-lg text-muted-foreground">
+              No medical records found.
+            </p>
+          </Card>
+        )}
       </div>
-    </main>
+    </div>
   );
 }
