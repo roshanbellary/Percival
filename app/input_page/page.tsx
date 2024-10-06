@@ -180,8 +180,8 @@ export default function InputPage() {
           body: formData,
         });
         responseMessage = response.ok;
-      } else {
-        const response = await fetch("http://127.0.0.1:5000/boom", {
+      } else if (inputType === "text") {
+        const response = await fetch("http://127.0.0.1:5000/upload-text", {
           method: "POST",
           body: formData,
         });
