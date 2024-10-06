@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -35,7 +35,7 @@ export default function Page({ params }: { params: { patient_id: string } }) {
     const fetchPatientData = async () => {
       try {
         const patientResponse = await fetch(
-          `http://127.0.0.1:5000/get-patient?id=${params.patient_id}`
+          `http://127.0.0.1:8000/get-patient?id=${params.patient_id}`
         );
         const jsonData = await patientResponse.json();
         const patient = jsonData["patient"];
