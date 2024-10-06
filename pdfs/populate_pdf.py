@@ -207,13 +207,27 @@ def find_editable_fields(client, prompt, pdf_path="namedform.pdf"):
 
 
 def store_initial_fields(client, prompt):
+    # Find editable fields based on the input prompt
     edit_json = find_editable_fields(client, prompt)
 
-    # Generate a randomized file name
-    file_name = ''.join(random.choices(
+    # Generate an anonymized file name
+    anonymized_file_name = 'anonymized_pdfs/' + ''.join(random.choices(
         string.ascii_lowercase + string.digits, k=12)) + ".pdf"
-    edit_fields(edit_json, "namedform.pdf", file_name)
 
-    print("Initial fields stored in file: ", file_name)
+    # Extract first_name and last_name from the JSON
+    first_name = edit_json.get('first_name', 'UnknownFirst')
+    last_name = edit_json.get('last_name', 'UnknownLast')
 
-    return file_name
+    # Create non-anonymized file name using first and last name
+    nonanonymized_file_name = f'nonanonymized_pdfs/{first_name}_{last_name}.pdf'
+
+    # Save the anonymized PDF
+    edit_fields(edit_json, "namedform.pdf", anonymized_file_name)
+    print(f"Anonymized fields stored in file: {anonymized_file_name}")
+
+    # Save the non-anonymized PDF
+    edit_fields(edit_json, "namedform.pdf", nonanonymized_file_name)
+    print(f"Non-anonymized fields stored in file: {nonanonymized_file_name}")
+
+    return anonymized_file_name, nonanonymized_file_name
+
