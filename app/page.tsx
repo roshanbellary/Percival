@@ -1,6 +1,5 @@
 "use client"
 
-import Image from "next/image"
 import Link from "next/link"
 import { useState, FormEvent } from "react"
 
@@ -10,9 +9,6 @@ import { Label } from "@/components/ui/label"
 
 import { useRouter } from 'next/navigation'
 
-
-export const description =
-  "A login page with two columns. The first column has the login form with email and password. There's a Forgot your password link and a link to sign up if you do not have an account. The second column has a cover image."
 
 export default function Component() {
   const [email, setEmail] = useState("")
@@ -61,9 +57,9 @@ export default function Component() {
                   Forgot your password?
                 </Link>
               </div>
-              <Input 
-                id="password" 
-                type="password" 
+              <Input
+                id="password"
+                type="password"
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -84,14 +80,7 @@ export default function Component() {
           </div>
         </div>
       </div>
-      <div className="hidden bg-muted lg:block">
-        <Image
-          src="/placeholder.svg"
-          alt="Image"
-          width="1920"
-          height="1080"
-          className="h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
-        />
+      <div className="bg-muted lg:block">
       </div>
     </div>
   )

@@ -34,7 +34,7 @@ export const LoadingSpinner = ({ className }) => {
 export default function PatientHistory() {
   const [email, setEmail] = useState("");
   const [medicalRecords, setMedicalRecords] = useState<MedicalRecord[]>([]);
-  const [filteredMedicalRecords, setFilteredMedicalRecords] = useState<MedicalRecord[]>();
+  const [filteredMedicalRecords, setFilteredMedicalRecords] = useState<MedicalRecord[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
