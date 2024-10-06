@@ -169,6 +169,7 @@ export default function InputPage() {
       formData.append("audio", audioBlob, "recording.wav");
     } else if (inputType === "pdf" && pdfFile) {
       formData.append("pdf", pdfFile);
+      console.log("pdf");
     }
 
     try {
@@ -182,6 +183,12 @@ export default function InputPage() {
         responseMessage = response.ok;
       } else if (inputType === "text") {
         const response = await fetch("http://127.0.0.1:5000/upload-text", {
+          method: "POST",
+          body: formData,
+        });
+        responseMessage = response.ok;
+      } else {
+        const response = await fetch("http://127.0.0.1:5000/upload-pdf", {
           method: "POST",
           body: formData,
         });

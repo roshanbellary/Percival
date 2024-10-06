@@ -4,15 +4,15 @@ import librosa as lb
 import torch
 import pandas as pd
 from pydub import AudioSegment
+from pypdf import PdfReader
 from flask_cors import CORS
 import os
 import whisper
 import json
 import tempfile
-from pdfs.full_pdf_pipeline import create_anon_pdf
 
 app = Flask(__name__)
-CORS(app, support_credentials=True)
+CORS(app, support_credentials=True, resources={r"/*": {"origins": "http://localhost:3000"}})
 
 
 # importing whisper model
@@ -61,21 +61,23 @@ def get_transcript():
     
     return {'transcription': response_text}, 200
 
-
-@app.route('/get-transcript', methods=['GET'])
-def return_transcript():
-    # Assuming `a` is defined globally and holds the last transcript.
-    return {'transcript': a} if a else {'message': 'No transcript available'}, 404
-
-@app.route('/populate-pdf', methods=['POST'])
-def populate_pdf():
-    data = request.data
-    args = data['details']
-    file_name = create_anon_pdf(args)
-    return_object = {
-        data: file_name
-    }
-    return json.stringify(return_object)
+@app.route('/upload-pdf', methods=['POST'])
+def upload_pdf():
+    first_name = request.form.get('first_name')
+    last_name = request.form.get('last_name')
+    dob = request.form.get('dob')
+    ssn = request.form.get('ssn')
+    language = request.form.get('language')
+    pdf_file = request.form.get('pdf')
+    if not pdf_file:
+        return {'message': 'No pdf file provided'}, 400
+    reader = PdfReader(pdf_file)
+    pdf_text = ""
+    for page in reader.pages:
+        pdf_text += page.extract_text()
+    response_text = f"First Name: {first_name}, Last Name: {last_name}, DOB: {dob}, SSN: {ssn}, Language: {language}, Transcription: {pdf_text}"
+    print(response_text)
+    return {'transcription': response_text}, 200
 
 @app.route('/upload-text', methods=['POST'])
 def upload_text():
