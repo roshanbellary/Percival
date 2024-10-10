@@ -13,7 +13,7 @@ def make_gen_prompt(configs):
     master_template = """
     The patient's name is <FIRSTNAME> <LASTNAME>. The date of birth of the patient is <DOB>. The Physican's name is Dr. <DRFIRSTNAME> <DRLASTNAME>. The address is
     <DRADDRESS>, <DRCITY>, <DRSTATE>. The phone number is <DRPHONE>. The California license number is <DRLICENSE>.
-    The date completed is <DATE>. Their SSN is <SSN_1> <SSN_2> <SSN_3>.
+    The date today (the date this is being completed) is <DATE>. Their SSN is <SSN_1> <SSN_2> <SSN_3>.
 
     Below is the information for the patient uploaded to the system by the doctor.:
     <PATIENT_DATA>
@@ -44,7 +44,7 @@ def create_anon_pdf(configs):
     return file_stored
 
 
-def anonymize_pdf(file_name, client):
+def anonymize_pdf(file_name):
     """
     Anonymizes a public PDF file and updates the corresponding anonymized PDF.
 

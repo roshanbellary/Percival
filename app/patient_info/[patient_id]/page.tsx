@@ -19,6 +19,9 @@ interface MedicalRecord {
   LastName: string;
 }
 
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+
 export function LoadingSpinner() {
   return (
     <div role="status">
@@ -49,10 +52,31 @@ export default function Page({ params }: { params: { patient_id: string } }) {
   const downloadRef = useRef<HTMLAnchorElement>(null);
   const anonDownloadRef = useRef<HTMLAnchorElement>(null);
   const [overvoew, setOverview] = useState<{}>(null); // Initialize state
+  const [updating, setUpdating] = useState(false);
 
   const handleDownload = (ref: React.RefObject<HTMLAnchorElement>) => {
     if (ref.current) {
       ref.current.click();
+    }
+  };
+
+  const handleUpload = () => {
+    var f = document.getElementById("picture");
+    if (f.files.length > 0) {
+      setUpdating(true);
+      var formData = new FormData();
+      formData.append("file", f.files[0]);
+      formData.append("patient_id", params.patient_id);
+
+      fetch("http://localhost:8000/upload_file", {
+        method: "POST",
+        body: formData,
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          location.reload();
+        });
+      //
     }
   };
 
@@ -242,6 +266,31 @@ export default function Page({ params }: { params: { patient_id: string } }) {
                 >
                   <Download className="mr-2 h-4 w-4" />
                   Download Anonymized PDF
+                </Button>
+                {/* <Button
+                  onClick={() => handleUpload()}
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white"
+                >
+                  <Download className="mr-2 h-4 w-4" />
+                  Upload Edited PDF
+                </Button> */}
+                <div className="grid w-full max-w-sm items-center gap-1.5">
+                  {/* <Label htmlFor="picture">Picture</Label> */}
+                  <Input id="picture" type="file" className="" />
+                </div>
+                <Button
+                  onClick={() => handleUpload()}
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white"
+                  disabled={updating}
+                >
+                  {updating && (
+                    <div>
+                      <LoadingSpinner></LoadingSpinner>
+                      {/* <div style={{ padding: "5px" }}>Processing...</div> */}
+                    </div>
+                  )}
+                  <Download className="mr-2 h-4 w-4" /> {"  "}
+                  {!updating && <div>Upload Edited PDF</div>}
                 </Button>
               </div>
               <a

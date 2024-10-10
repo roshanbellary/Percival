@@ -531,5 +531,28 @@ def get_language_id(language):
     return None
 
 
+@app.route('/upload_file', methods=['POST'])
+def upload_file():
+    if 'file' not in request.files:
+        return jsonify({'error': 'No file part'}), 400
+
+    file = request.files['file']
+
+    patient_id = request.form['patient_id']
+    patient_data = patients_collection.find_one({'_id': ObjectId(patient_id)})
+    if not patient_data:
+        return jsonify({'error': 'Patient not found'}), 404
+
+    patient_pdf_name = patient_data['pdf']
+
+    # rename file to be patient_pdf_name (which includes filetype)
+
+    file.save(os.path.join('../public/pdfs', patient_pdf_name))
+
+    anonymize_pdf(patient_pdf_name)
+
+    return jsonify({'success': 'File uploaded'}), 200
+
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8000, debug=True)
